@@ -4,7 +4,7 @@
 
 url: http://goshakkk.name
 title: Gosha Arinich
-subtitle: A young hacker's blog about Ruby, Rails, Objective-C and perfection
+subtitle: The blog of young geek and passionate application developer who cares about perfect code
 author: Gosha Arinich
 simple_search: http://google.com/search
 
@@ -49,7 +49,7 @@ default_asides: [asides/recent_posts.html, asides/twitter.html, asides/delicious
 
 # Twitter
 twitter_user: goshakkk
-twitter_tweet_count: 4
+twitter_tweet_count: 6
 twitter_show_replies: false
 twitter_follow_button: true
 twitter_show_follower_count: false
