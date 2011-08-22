@@ -1,42 +1,56 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gosha Arinich</title>
+    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.0.0.min.css">
+    <link rel="stylesheet" href="/stylesheets/github-ribbon.css">
+    <link rel="stylesheet" href="/stylesheets/mini-main.css">
+  </head>
+  <body>
+    <div class="ribbon">
+      <a href="#" rel="me">Fork me on GitHub</a>
+    </div>
+    <div class="container">
+      <img src="http://goshakkk.name/images/eightbit-avatar.png" class="avatar">
 
-<div class="blog-index">
-{% assign index = true %}
-{% for post in paginator.posts %}
-{% assign content = post.content %}
-  <article>
-    {% include article.html %}
-  </article>
-{% endfor %}
-<nav role="pagination">
-  <div>
-    {% if paginator.next_page %}
-      <a class="prev" href="{{paginator.next_page}}">&larr; Older</a>
-    {% endif %}
-    <a href="/blog/archives">Blog Archives</a>
-    {% if paginator.previous_page %}
-    <a class="next" href="{{paginator.previous_page}}">Newer &rarr;</a>
-    {% endif %}
-  </div>
-</nav>
-{% if site.disqus_short_name %}
-<script type="text/javascript">
-    var disqus_shortname = '{{ site.disqus_short_name }}';
-    (function () {
-      var s = document.createElement('script'); s.async = true;
-      s.type = 'text/javascript';
-      s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
-      (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-    }());
-</script>
-{% endif %}
-</div>
-<aside role=sidebar>
-  {% if site.blog_index_asides.size %}
-    {% include_array blog_index_asides %}
-  {% else %}
-    {% include_array default_asides %}
-  {% endif %}
-</aside>
+      <h1>I'm Gosha Arinich <small>Young Geek & Passionate Application Developer</small></h1>
+      <div class="row">
+        <div class="span4 columns"></div>
+        <div class="span12 columns"></div>
+      </div>
+      <p>I'm a geek and fucking awesome developer who cares about perfect code. Drop me a line at <a href="mailto:me@goshakkk.name">me&#64;goshakkk.name</a></p>
+      
+      <h2><a href="http://goshakkk.name/blog">Blog &rarr;</a></h2>
+      
+      <h3>Me, on the web</h3>
+      <a href="http://github.com/goshakkk"><img src="http://goshakkk.name/images/icons/octocat_64.png" height="60" width="60" class="well"></a>
+      <a href="http://twitter.com/goshakkk"><img src="http://goshakkk.name/images/icons/twitter_64.png" height="60" width="60" class="well"></a>
+      <a href="http://delicious.com/goshakkk"><img src="http://goshakkk.name/images/icons/delicious_64.png" height="60" width="60" class="well"></a>
+      <a href="http://www.last.fm/user/goshakkk"><img src="http://goshakkk.name/images/icons/lastfm_64.png" height="60" width="60" class="well"></a>
+      <a href="http://www.linkedin.com/in/goshakkk"><img src="http://goshakkk.name/images/icons/linkedin_64.png" height="60" width="60" class="well"></a>
+      
+      <h3>I use</h3>
+       <a href="http://en.wikipedia.org/wiki/Brain"><img src="http://goshakkk.name/images/icons/brain_64.png" height="60" width="60" class="well"></a>
+       <a href="http://www.apple.com/mac/"><img src="http://goshakkk.name/images/icons/macbook-black_64.png" height="60" width="60" class="well"></a>
+       <a href="http://www.apple.com/macosx/"><img src="http://goshakkk.name/images/icons/os-x-lion_64.png" height="60" width="60" class="well"></a>
+       <a href="http://www.apple.com/safari/"><img src="http://goshakkk.name/images/icons/safari_64.png" height="60" width="60" class="well"></a>
+       <a href="http://macromates.com/"><img src="http://goshakkk.name/images/icons/textmate_64.png" height="60" width="60" class="well"></a>
+       <a href="http://agilebits.com/products/1Password/Mac"><img src="http://goshakkk.name/images/icons/1password_64.png" height="60" width="60" class="well"></a>
+       <a href="https://www.evernote.com/"><img src="http://goshakkk.name/images/icons/evernote_64.png" height="60" width="60" class="well"></a>
+       <a href="http://culturedcode.com/things/"><img src="http://goshakkk.name/images/icons/things-app_64.png" height="60" width="60" class="well"></a>
+       <a href="https://www.dropbox.com/"><img src="http://goshakkk.name/images/icons/dropbox_64.png" height="60" width="60" class="well"></a>
+       <a href="http://d.pr/"><img src="http://goshakkk.name/images/icons/droplr_64.png" height="60" width="60" class="well"></a>
+       <a href="http://www.pixelmator.com/"><img src="http://goshakkk.name/images/icons/pixelmator_64.png" height="60" width="60" class="well"></a>
+       <a href="http://reederapp.com/mac/"><img src="http://goshakkk.name/images/icons/reeder_64.png" height="60" width="60" class="well"></a>
+       <a href="http://www.apple.com/iwork/pages/"><img src="http://goshakkk.name/images/icons/pages_64.png" height="60" width="60" class="well"></a>
+       <a href="http://www.panic.com/coda/"><img src="http://goshakkk.name/images/icons/coda_64.png" height="60" width="60" class="well"></a>
+       <a href="http://git-scm.com/"><img src="http://goshakkk.name/images/icons/git_64.png" height="60" width="60" class="well"></a>
+       <a href="http://www.ruby-lang.org/"><img src="http://goshakkk.name/images/icons/ruby_64.png" height="60" width="60" class="well"></a>
+       <a href="http://rubyonrails.org/"><img src="http://goshakkk.name/images/icons/rails_64.png" height="60" width="60" class="well"></a>
+       <a href="http://beginrescueend.com/"><img src="http://goshakkk.name/images/icons/rvm_64.png" height="60" width="60" class="well"></a>
+       
+      <p>&copy; 2011 Gosha Arinich</p>
+      <p>Made on  <a href="http://www.apple.com/mac/"><img src="http://goshakkk.name/images/icons/apple_64.png" height="17" width="14"></a>, made with  <a href="http://www.panic.com/coda/"><img src="http://goshakkk.name/images/icons/coda_64.png" height="15" width="15"></a></p>
+    </div>
+  </body>
+</html>
