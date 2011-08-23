@@ -17,7 +17,8 @@
         $.getJSON("http://api.twitter.com/1/statuses/user_timeline.json?screen_name=goshakkk&exclude_replies=true&callback=?", function(data) {
           $("#twitter").html(data[0].text);
         });
-      });
+        $('.hero-unit').click(function() { $('#vcard-img').slideToggle('slow'); $('#vcard-box').slideToggle('slow'); $('#avatar').toggle('slow'); $('#hero-description').toggle('slow'); });
+      }); 
     </script>
     
     <!-- Favicon and touch icons -->
@@ -28,17 +29,28 @@
     <a href="http://github.com/goshakkk"><img style="position: fixed; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
     <section class="container">
       <header class="hero-unit">
-        <hgroup>
-          <figure><img src="http://goshakkk.name/images/eightbit-avatar.png"></figure>
-          <figcaption><h1>Gosha Arinich</h1></figcaption>
-          <h6>Young Geek & Passionate Application Developer</h6>
-        </hgroup>
-        <p>I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
-        <p><blockquote>
-          <p id="twitter"></p>
-          <small>Gosha Arinich (<a href="http://twitter.com/goshakkk">@goshakkk</a>)</small>
-        </blockquote></p>
-        <p><a class="btn primary large" href="mailto:me@goshakkk.name">Drop me a line</a> <a class="btn large" href="http://goshakkk.name/assets/CV.pdf">CV</a></p>
+        <section id="vcard-img" style="display: none;">
+          <img src="http://goshakkk.name/images/vcard_qr.png">
+        </section>
+        <section id="main-hero-unit">
+          <hgroup>
+            <figure id="avatar"><img src="http://goshakkk.name/images/eightbit-avatar.png"></figure>
+            <figcaption><h1>Gosha Arinich</h1></figcaption>
+            <h6>Young Geek & Passionate Application Developer</h6>
+          </hgroup>
+          <section id="hero-description">
+            <p>I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
+            <blockquote class="well">
+              <p id="twitter"></p>
+              <small>Gosha Arinich (<a href="http://twitter.com/goshakkk">@goshakkk</a>)</small>
+            </blockquote>
+            <p><a class="btn primary large" href="mailto:me@goshakkk.name">Drop me a line</a> <a class="btn large" href="http://goshakkk.name/assets/CV.pdf">CV</a></p>
+          </section>
+        </section>
+        <section id="vcard-box" style="display: none;">
+          <p>Here you can download my vCard or just scan its QR code</p>
+          <p><a href="http://goshakkk.name/assets/Gosha Arinich.vcf" class="btn primary large">vCard</a></p>
+        </section>
       </header>
       <h2><a href="http://goshakkk.name/blog">Blog &rarr;</a></h2>
       <section>
