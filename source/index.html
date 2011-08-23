@@ -10,6 +10,16 @@
     <!-- Custom stylesheets -->
     <link rel="stylesheet" href="http://goshakkk.name/stylesheets/mini-main.css">
     
+    <!-- jQuery -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $.getJSON("http://api.twitter.com/1/statuses/user_timeline.json?screen_name=goshakkk&exclude_replies=true&callback=?", function(data) {
+          $("#twitter").html(data[0].text);
+        });
+      });
+    </script>
+    
     <!-- Favicon and touch icons -->
     <link rel="shortcut icon" href="http://goshakkk.name/favicon.png">
     <link rel="apple-touch-icon" href="http://goshakkk.name/apple-touch-icon.png">
@@ -24,6 +34,10 @@
           <h6>Young Geek & Passionate Application Developer</h6>
         </hgroup>
         <p>I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
+        <p><blockquote>
+          <p id="twitter"></p>
+          <small>Gosha Arinich (<a href="http://twitter.com/goshakkk">@goshakkk</a>)</small>
+        </blockquote></p>
         <p><a class="btn primary large" href="mailto:me@goshakkk.name">Drop me a line</a> <a class="btn large" href="http://goshakkk.name/assets/CV.pdf">CV</a></p>
       </header>
       <h2><a href="http://goshakkk.name/blog">Blog &rarr;</a></h2>
