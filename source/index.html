@@ -29,7 +29,7 @@
         $.getJSON("http://api.twitter.com/1/statuses/user_timeline.json?screen_name=goshakkk&exclude_replies=true&callback=?", function(data) {
           $("#twitter").html(data[0].text);
         });
-        $('.hero-unit >').click(function() { $('#vcard-img').slideToggle('slow'); $('#vcard-box').slideToggle('slow'); $('#avatar').toggle('slow'); $('#hero-description').toggle('slow'); });
+        $('.hero-unit').click(function() { $('#vcard-img').slideToggle('slow'); $('#vcard-box').slideToggle('slow'); $('#avatar').toggle('slow'); $('#hero-description').toggle('slow'); });
       }); 
     </script>
     
@@ -73,6 +73,7 @@
           <a href="http://twitter.com/goshakkk"><img src="http://goshakkk.name/images/icons/twitter_64.png" height="60" width="60" class="well"></a>
           <a href="http://delicious.com/goshakkk"><img src="http://goshakkk.name/images/icons/delicious_64.png" height="60" width="60" class="well"></a>
           <a href="http://www.last.fm/user/goshakkk"><img src="http://goshakkk.name/images/icons/lastfm_64.png" height="60" width="60" class="well"></a>
+          <a href="http://www.flickr.com/photos/goshakkk/"><img src="http://goshakkk.name/images/icons/flickr_64.png" height="60" width="60" class="well"></a>
           <a href="http://www.linkedin.com/in/goshakkk"><img src="http://goshakkk.name/images/icons/linkedin_64.png" height="60" width="60" class="well"></a>
         </nav>
       </section>
