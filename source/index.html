@@ -8,7 +8,11 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.1.0.min.css">
     <!-- Custom stylesheets -->
-    <link rel="stylesheet" href="http://goshakkk.name/stylesheets/mini-main.css">
+    <style>
+      .center-text {
+        text-align: center;
+      }
+    </style>
     
     <script type="text/javascript">
       var _gaq = _gaq || [];
@@ -30,7 +34,7 @@
           $("#twitter").html(data[0].text);
         });
         $('#main-container').hide();
-        $('#main-container').fadeIn(5000);
+        $('#main-container').fadeIn(4000);
         $('.hero-unit').click(function() { $('#vcard-img').slideToggle('slow'); $('#vcard-box').slideToggle('slow'); $('#avatar').toggle('slow'); $('#hero-description').toggle('slow'); });
       }); 
     </script>
@@ -42,7 +46,7 @@
   <body>
     <section class="container" id="main-container">
       <a href="http://github.com/goshakkk"><img style="position: fixed; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
-      <header class="hero-unit" itemscope itemtype="http://schema.org/Person">
+      <header class="hero-unit center-text" itemscope itemtype="http://schema.org/Person">
         <section id="vcard-img" style="display: none;">
           <img src="http://goshakkk.name/images/vcard_qr.png">
         </section>
@@ -66,10 +70,24 @@
           <p><a href="http://goshakkk.name/assets/Gosha Arinich.vcf" class="btn primary large">vCard</a></p>
         </section>
       </header>
-      <h2><a href="http://goshakkk.name/blog">Blog &rarr;</a></h2>
-      <section>
-        <header><h2>Me, on the web</h2></header>
-        <p>Links to my profiles on various sites</p>
+      <section class="row" style="margin-bottom: 35px;">
+        <h2 class="center-text">Why I'm different</h2>
+        <section class="span5 columns">
+          <h3 class="center-text">Perfectionist <small>inside</small></h3>
+          <p>I just try to make the things I make perfect and simple. Both in code and look & feel. I enjoy doing it.</p>
+        </section>
+        <section class="span5 columns">
+          <h3 class="center-text"> I follow trends</h3>
+          <p>I follow new technologies. I learn them hard to know brilliant, I learn with fun. I use them in production. I know them well.</p>
+        </section>
+        <section class="span5 columns">
+          <h3 class="center-text">Passionate</h3>
+          <p>Yeah, I code with passion in mind. I love developing so much! Can't imagine my life without it. Actually programming is my life.</p>
+        </section>
+      </section>
+      <section class="center-text">
+        <header><h2>Me<small>, on the web</small></h2></header>
+        <p>Links to my profiles on various sites. Also feel free to visit <a href="http://goshakkk.name/blog">my blog</a></p>
         <nav>
           <a href="http://github.com/goshakkk"><img src="http://goshakkk.name/images/icons/octocat_64.png" height="60" width="60" class="well"></a>
           <a href="http://twitter.com/goshakkk"><img src="http://goshakkk.name/images/icons/twitter_64.png" height="60" width="60" class="well"></a>
@@ -79,8 +97,8 @@
           <a href="http://www.linkedin.com/in/goshakkk"><img src="http://goshakkk.name/images/icons/linkedin_64.png" height="60" width="60" class="well"></a>
         </nav>
       </section>
-      <section>
-        <header><h2>Stuff I use</h2></header>
+      <section class="center-text">
+        <header><h2><small>Stuff</small> I use</h2></header>
         <p>Programming languages, tools, utilities, apps and services I use</p>
         <nav>
           <!-- <a href="http://en.wikipedia.org/wiki/Brain"><img src="http://goshakkk.name/images/icons/brain_64.png" height="60" width="60" class="well"></a> -->
@@ -114,10 +132,11 @@
           <a href="http://heroku.com/"><img src="http://goshakkk.name/images/icons/heroku_64.png" height="60" width="60" class="well"></a>
         </nav>
        </section>
-       <footer>
+       <footer class="center-text">
         <p>&copy; 2011 Gosha Arinich</p>
         <p><a class="btn small danger" href="https://flattr.com/donation/give/to/goshakkk">Donate</a></p>
-        <p>Made on  <a href="http://www.apple.com/mac/"><img src="http://goshakkk.name/images/icons/apple_64.png" height="17" width="14"></a>, made with  <a href="http://macrabbit.com/espresso/"><img src="http://goshakkk.name/images/icons/espresso_64.png" height="15" width="15"></a> and Twitter's <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>.</p>
+        <p>Made on  <a href="http://www.apple.com/mac/"><img src="http://goshakkk.name/images/icons/apple_64.png" height="17" width="14"></a>, made with  <a href="http://macrabbit.com/espresso/"><img src="http://goshakkk.name/images/icons/espresso_64.png" height="15" width="15"></a> and <small>Twitter's</small> <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>.</p>
+        <p></p>
       </footer>
     </section>
   </body>
