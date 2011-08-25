@@ -29,6 +29,8 @@
         $.getJSON("http://api.twitter.com/1/statuses/user_timeline.json?screen_name=goshakkk&exclude_replies=true&callback=?", function(data) {
           $("#twitter").html(data[0].text);
         });
+        $('#main-container').hide();
+        $('#main-container').fadeIn(5000);
         $('.hero-unit').click(function() { $('#vcard-img').slideToggle('slow'); $('#vcard-box').slideToggle('slow'); $('#avatar').toggle('slow'); $('#hero-description').toggle('slow'); });
       }); 
     </script>
@@ -38,8 +40,8 @@
     <link rel="apple-touch-icon" href="http://goshakkk.name/apple-touch-icon.png">
   </head>
   <body>
-    <a href="http://github.com/goshakkk"><img style="position: fixed; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
-    <section class="container">
+    <section class="container" id="main-container">
+      <a href="http://github.com/goshakkk"><img style="position: fixed; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
       <header class="hero-unit" itemscope itemtype="http://schema.org/Person">
         <section id="vcard-img" style="display: none;">
           <img src="http://goshakkk.name/images/vcard_qr.png">
