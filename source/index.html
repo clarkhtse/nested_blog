@@ -31,7 +31,8 @@
     <script>
       $(document).ready(function() {
         $.getJSON("http://api.twitter.com/1/statuses/user_timeline.json?screen_name=goshakkk&exclude_replies=true&callback=?", function(data) {
-          $("#twitter").html(data[0].text);
+          $('#twitter').html(data[0].text);
+          $('#twitter-blockquote').show();
         });
         $('#main-container').hide();
         $('#main-container').fadeIn(4000);
@@ -58,7 +59,7 @@
           </hgroup>
           <section id="hero-description">
             <p itemprop="description">I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
-            <blockquote class="well">
+            <blockquote class="well" id="twitter-blockquote" style="display: none;">
               <p id="twitter"></p>
               <small>Gosha Arinich (<a href="http://twitter.com/goshakkk">@goshakkk</a>)</small>
             </blockquote>
