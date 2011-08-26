@@ -1,0 +1,16 @@
+/* Me */
+Gosha Arinich: Young Geek & Passionate Application Developer Who Cares About Perfect Code
+Site: http://goshakkk.name/
+E-mail: me@goshakkk.name
+Twitter: @goshakkk
+Location: Minsk, Belarus
+
+/* Site */
+Standards: HTML5, CSS3
+Components: jQuery, Twitter API, Bootstrap
+Software: Espresso
+
+=============
+
+What is this file?
+http://humanstxt.org
