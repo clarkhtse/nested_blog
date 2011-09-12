@@ -27,6 +27,9 @@ server_port     = "4000"      # port for preview server eg. localhost:4000
 
 desc "Initial setup for Octopress: copies the default theme into the path of Jekyll's generator. Rake install defaults to rake install[classic] to install a different theme run rake install[some_theme_name]"
 task :install, :theme do |t, args|
+  if File.directory?(source_dir) || File.directory?("sass")
+    abort("rake aborted!") if ask("A theme is already installed, proceeding will overwrite existing files. Are you sure?", ['y', 'n']) == 'n'
+  end
   # copy theme into working Jekyll directories
   theme = args.theme || 'classic'
   puts "## Copying "+theme+" theme into ./#{source_dir} and ./sass"
@@ -53,34 +56,31 @@ desc "Watch the site and regenerate when it changes"
 task :watch do
   raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
   puts "Starting to watch source with Jekyll and Compass."
-  jekyllPid = spawn("jekyll --auto")
-  compassPid = spawn("compass watch")
+  jekyllPid = Process.spawn("jekyll --auto")
+  compassPid = Process.spawn("compass watch")
 
   trap("INT") {
-	Process.kill(9, jekyllPid)
-	Process.kill(9, compassPid)
-	exit 0
+    [jekyllPid, compassPid].each { |pid| Process.kill(9, pid) rescue Errno::ESRCH }
+    exit 0
   }
 
-  Process.wait
+  [jekyllPid, compassPid].each { |pid| Process.wait(pid) }
 end
 
 desc "preview the site in a web browser"
 task :preview do
   raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
   puts "Starting to watch source with Jekyll and Compass. Starting Rack on port #{server_port}"
-  jekyllPid = spawn("jekyll --auto")
-  compassPid = spawn("compass watch")
-  rackupPid = spawn("rackup --port #{server_port}")
+  jekyllPid = Process.spawn("jekyll --auto")
+  compassPid = Process.spawn("compass watch")
+  rackupPid = Process.spawn("rackup --port #{server_port}")
 
   trap("INT") {
-	Process.kill(9, jekyllPid)
-	Process.kill(9, compassPid)
-	Process.kill(9, rackupPid)
-	exit 0
+    [jekyllPid, compassPid, rackupPid].each { |pid| Process.kill(9, pid) rescue Errno::ESRCH }
+    exit 0
   }
 
-  Process.wait
+  [jekyllPid, compassPid, rackupPid].each { |pid| Process.wait(pid) }
 end
 
 # usage rake new_post[my-new-post] or rake new_post['my new post'] or rake new_post (defaults to "new-post")
@@ -93,9 +93,7 @@ task :new_post, :title do |t, args|
   title = args.title
   filename = "#{source_dir}/#{posts_dir}/#{Time.now.strftime('%Y-%m-%d')}-#{title.to_url}.#{new_post_ext}"
   if File.exist?(filename)
-    puts "### #{filename} Already exists. Overwrite? y/n:"
-    response = $stdin.gets.chomp.downcase
-    next unless response == 'y'
+    abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
   end
   puts "Creating new post: #{filename}"
   open(filename, 'w') do |post|
@@ -125,9 +123,7 @@ task :new_page, :filename do |t, args|
     mkdir_p page_dir
     file = page_dir + filename
     if File.exist?(file)
-      puts "### #{file} Already exists. Overwrite? y/n:"
-      response = $stdin.gets.chomp.downcase
-      next unless response == 'y'
+      abort("rake aborted!") if ask("#{file} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
     end
     puts "Creating new page: #{file}"
     open(file, 'w') do |page|
@@ -200,15 +196,21 @@ end
 ##############
 
 desc "Default deploy task"
-multitask :deploy => [:copydot, "#{deploy_default}"] do
+task :deploy do
+  [:copydot, "#{deploy_default}"].each { |t| Rake::Task[t].execute }
+end
+
+desc "Generate website and deploy"
+task :gen_deploy do
+  [:integrate, :generate, :deploy].each { |t| Rake::Task[t].execute }
 end
 
 desc "copy dot files for deployment"
 task :copydot do
-   exclusions = [".", "..", ".DS_Store"]
-   Dir["#{source_dir}/.*"].each do |file|
-     if !File.directory?(file) && !exclusions.include?(file)
-       cp(file, "#{public_dir}");
+  exclusions = [".", "..", ".DS_Store"]
+  Dir["#{source_dir}/**/.*"].each do |file|
+    if !File.directory?(file) && !exclusions.include?(file)
+      cp(file, file.gsub(/#{source_dir}/, "#{public_dir}"));
     end
   end
 end
@@ -299,6 +301,20 @@ def ok_failed(condition)
   else
     puts "FAILED"
   end
+end
+
+def get_stdin(message)
+  print message
+  STDIN.gets.chomp
+end
+
+def ask(message, valid_options)
+  if valid_options
+    answer = get_stdin("#{message} #{valid_options.to_s.gsub(/"/, '').gsub(/, /,'/')} ") while !valid_options.include?(answer)
+  else
+    answer = get_stdin(message)
+  end
+  answer
 end
 
 desc "list tasks"
