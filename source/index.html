@@ -9,14 +9,26 @@
     <link rel="author" href="humans.txt">
     
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-1.2.0.min.css">
+    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
     <!-- Custom stylesheets -->
     <style>
       body {
         background: url(http://goshakkk.name/images/landing_bg.png) center center;
+        padding-top: 55px;
       }
       .center-text {
         text-align: center;
+      }
+      .left-text {
+        text-align: left;
+      }
+      #avatar {
+        height: 150px;
+        width: 150px;
+      }
+      #avatar-small {
+        height: 45px;
+        width: 45px;
       }
     </style>
     
@@ -35,6 +47,9 @@
     
     <!-- jQuery -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <!-- Bootstrap twipsy & popover -->
+    <script src="http://twitter.github.com/bootstrap/1.3.0/bootstrap-twipsy.js"></script>
+    <script src="http://twitter.github.com/bootstrap/1.3.0/bootstrap-popover.js"></script>
     <!-- Page animations and recent tweet manipulations -->
     <script>
       $(document).ready(function() {
@@ -45,14 +60,17 @@
           $('#twitter-blockquote').show();
         });
         // hiding main container
-        $('#main-container').hide();
+        $('body').hide();
         // and showing it with very very slow fade animation
-        $('#main-container').fadeIn(4000);
+        $('body').fadeIn(4000);
         // when any place inside hero-unit is clicked
         // show QR code of vCard and link to vCard itself
         function toggleVcard() {
           $('#vcard-img').slideToggle('slow'); $('#vcard-box').slideToggle('slow'); $('#avatar').toggle('slow'); $('#hero-description').toggle('slow');
         }
+        $('#avatar, #qr').click(toggleVcard);
+        $('#avatar').popover();
+        $('#ruby').popover({ placement: 'left' });
       }); 
     </script>
     
@@ -65,26 +83,33 @@
       <!-- Github Ribbon -->
       <a href="http://github.com/goshakkk"><img style="position: fixed; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
       <!-- 8-bit Ruby Logo -->
-      <img src="images/eightbit-ruby.png" alt="icon" style="position: fixed; top: 30px; right: -55px; border: 0; opacity: 0.5;">
+      <img src="images/eightbit-ruby.png" alt="icon" style="position: fixed; top: 30px; right: -55px; border: 0; opacity: 0.5;" id="ruby" data-content="Sure." data-original-title="I love Ruby">
       
       <header class="hero-unit center-text" itemscope itemtype="http://schema.org/Person">
         <!-- vCard QR Code -->
         <section id="vcard-img" style="display: none;">
-          <img src="http://goshakkk.name/images/vcard_qr.png" alt="icon">
+          <img src="http://goshakkk.name/images/vcard_qr.png" id="qr" alt="icon">
         </section>
         <section id="main-hero-unit">
-          <img itemprop="image" src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar">
+          <img itemprop="image" src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar" data-content="Click on the avatar to see its QR code and VCard download link." data-original-title="Need my vCard?">
           <hgroup>
             <h1 itemprop="name">Gosha Arinich</h1>
             <h6 itemprop="jobTitle">Young Geek & Passionate Application Developer</h6>
           </hgroup>
           <section id="hero-description">
             <p itemprop="description">I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
-            <p><small>I enjoy <a href="http://github.com/goshakkk"><img src="http://goshakkk.name/images/icons/octocat_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> coding</a>, <a href="http://goshakkk.name/blog"> writing to blog</a> and <a href="http://stackoverflow.com/users/708635/goshakkk"><img src="http://goshakkk.name/images/icons/stackoverflow_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> answering</a>, like to <a href="http://twitter.com/goshakkk"><img src="http://goshakkk.name/images/icons/twitter_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> tweet</a> and <a href="http://delicious.com/goshakkk"><img src="http://goshakkk.name/images/icons/delicious_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> bookmark</a>, love to <a href="http://www.last.fm/user/goshakkk"><img src="http://goshakkk.name/images/icons/lastfm_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> listen to music</a> and <a href="http://www.flickr.com/photos/goshakkk/"><img src="http://goshakkk.name/images/icons/flickr_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> share photos</a>.<br>
+            <p><small>I enjoy <a href="http://github.com/goshakkk"><img src="http://goshakkk.name/images/icons/octocat_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> coding</a>, <a href="http://goshakkk.name/blog"> writing to blog</a> and <a href="http://stackoverflow.com/users/708635/goshakkk"><img src="http://goshakkk.name/images/icons/stackoverflow_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> answering</a>, like to <a href="http://twitter.com/goshakkk"><img src="http://goshakkk.name/images/icons/twitter_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> tweet</a> and <a href="http://delicious.com/goshakkk"><img src="http://goshakkk.name/images/icons/delicious_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> bookmark</a>, love to <a href="http://www.last.fm/user/goshakkk"><img src="http://goshakkk.name/images/icons/lastfm_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> listen to music</a> and <a href="http://www.flickr.com/photos/goshakkk/" class="well"><img src="http://goshakkk.name/images/icons/flickr_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> share photos</a>.<br>
               I'm on <a href="http://www.linkedin.com/in/goshakkk"><img src="http://goshakkk.name/images/icons/linkedin_64.png" alt="icon" height="20" width="20" style="vertical-align: middle;"> LinkedIn</a> by the way.</small></p>
-            <blockquote class="well" id="twitter-blockquote" style="display: none;">
-              <p id="twitter"></p>
-              <small>Gosha Arinich (<a href="http://twitter.com/goshakkk">@goshakkk</a>)</small>
+            <blockquote class="well left-text" id="twitter-blockquote" style="display: none;">
+              <section class="row">
+                <section class="span1">
+                  <img src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar-small">
+                </section>
+                <section class="span12">
+                  <p id="twitter"></p>
+                  <small>Gosha Arinich (<a href="http://twitter.com/goshakkk">@goshakkk</a>)</small>
+                </section>
+              </section>
             </blockquote>
           </section>
         </section>
@@ -140,36 +165,40 @@
       <section class="center-text">
         <header><h2><small>Stuff</small> I use</h2></header>
         <p>Programming languages, tools, utilities, apps and services I use</p>
+        <ul class="media-grid">
+          <li><a href="http://www.apple.com/macosx/" class="well"><img src="http://goshakkk.name/images/icons/os-x-lion_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://macromates.com/" class="well"><img src="http://goshakkk.name/images/icons/textmate_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="https://www.evernote.com/" class="well"><img src="http://goshakkk.name/images/icons/evernote_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://d.pr/" class="well"><img src="http://goshakkk.name/images/icons/droplr_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://www.pixelmator.com/" class="well"><img src="http://goshakkk.name/images/icons/pixelmator_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://macrabbit.com/espresso/" class="well"><img src="http://goshakkk.name/images/icons/espresso_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://www.kaleidoscopeapp.com/" class="well"><img src="http://goshakkk.name/images/icons/kaleidoscope_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://git-scm.com/" class="well"><img src="http://goshakkk.name/images/icons/git_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://pow.cx/" class="well"><img src="http://goshakkk.name/images/icons/pow_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://www.ruby-lang.org/" class="well"><img src="http://goshakkk.name/images/icons/ruby_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://rubygems.org/" class="well"><img src="http://goshakkk.name/images/icons/rubygems_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://rubyonrails.org/" class="well"><img src="http://goshakkk.name/images/icons/rails_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://rbenv.org/" class="well"><img src="http://goshakkk.name/images/icons/rbenv_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://cukes.info/" class="well"><img src="http://goshakkk.name/images/icons/cucumber_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://jashkenas.github.com/coffee-script/" class="well"><img src="http://goshakkk.name/images/icons/coffeescript_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://haml-lang.com/" class="well"><img src="http://goshakkk.name/images/icons/haml_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://sass-lang.com/" class="well"><img src="http://goshakkk.name/images/icons/sass_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://heroku.com/" class="well"><img src="http://goshakkk.name/images/icons/heroku_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://opensource.org/" class="well"><img src="http://goshakkk.name/images/icons/opensource_64.png" alt="icon" class="thumbnail"></a></li>
+          <li><a href="http://google.com/" class="well"><img src="http://goshakkk.name/images/icons/google_64.png" alt="icon" class="thumbnail"></a></li>
+        </ul>
         <nav>
-<!--           <a href="http://en.wikipedia.org/wiki/Brain"><img src="http://goshakkk.name/images/icons/brain_64.png" alt="icon" height="60" width="60" class="well"></a> -->
-<!--           <a href="http://www.apple.com/mac/"><img src="http://goshakkk.name/images/icons/macbook-black_64.png" alt="icon" height="60" width="60" class="well"></a> -->
-          <a href="http://www.apple.com/macosx/"><img src="http://goshakkk.name/images/icons/os-x-lion_64.png" alt="icon" height="60" width="60" class="well"></a>
-<!--          <a href="http://www.apple.com/safari/"><img src="http://goshakkk.name/images/icons/safari_64.png" alt="icon" height="60" width="60" class="well"></a>-->
-          <!-- <a href="http://google.com/"><img src="http://goshakkk.name/images/icons/google_64.png" alt="icon" height="60" width="60" class="well"></a> -->
-          <a href="http://macromates.com/"><img src="http://goshakkk.name/images/icons/textmate_64.png" alt="icon" height="60" width="60" class="well"></a>
-<!--          <a href="http://agilebits.com/products/1Password/Mac"><img src="http://goshakkk.name/images/icons/1password_64.png" alt="icon" height="60" width="60" class="well"></a>-->
-          <a href="https://www.evernote.com/"><img src="http://goshakkk.name/images/icons/evernote_64.png" alt="icon" height="60" width="60" class="well"></a>
-<!--          <a href="http://culturedcode.com/things/"><img src="http://goshakkk.name/images/icons/things-app_64.png" alt="icon" height="60" width="60" class="well"></a>-->
-<!--          <a href="https://www.dropbox.com/"><img src="http://goshakkk.name/images/icons/dropbox_64.png" alt="icon" height="60" width="60" class="well"></a>-->
-          <a href="http://d.pr/"><img src="http://goshakkk.name/images/icons/droplr_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://www.pixelmator.com/"><img src="http://goshakkk.name/images/icons/pixelmator_64.png" alt="icon" height="60" width="60" class="well"></a>
-<!--          <a href="http://reederapp.com/mac/"><img src="http://goshakkk.name/images/icons/reeder_64.png" alt="icon" height="60" width="60" class="well"></a>-->
-<!--          <a href="http://www.apple.com/iwork/pages/"><img src="http://goshakkk.name/images/icons/pages_64.png" alt="icon" height="60" width="60" class="well"></a>-->
-<!--           <a href="http://www.panic.com/coda/"><img src="http://goshakkk.name/images/icons/coda_64.png" alt="icon" height="60" width="60" class="well"></a> -->
-          <a href="http://macrabbit.com/espresso/"><img src="http://goshakkk.name/images/icons/espresso_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://www.kaleidoscopeapp.com/"><img src="http://goshakkk.name/images/icons/kaleidoscope_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://git-scm.com/"><img src="http://goshakkk.name/images/icons/git_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://pow.cx/"><img src="http://goshakkk.name/images/icons/pow_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://www.ruby-lang.org/"><img src="http://goshakkk.name/images/icons/ruby_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://rubygems.org/"><img src="http://goshakkk.name/images/icons/rubygems_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://rubyonrails.org/"><img src="http://goshakkk.name/images/icons/rails_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://rbenv.org/"><img src="http://goshakkk.name/images/icons/rbenv_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://cukes.info/"><img src="http://goshakkk.name/images/icons/cucumber_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://jashkenas.github.com/coffee-script/"><img src="http://goshakkk.name/images/icons/coffeescript_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://haml-lang.com/"><img src="http://goshakkk.name/images/icons/haml_64.png" alt="icon" height="60" width="60" class="well"></a>
-          <a href="http://sass-lang.com/"><img src="http://goshakkk.name/images/icons/sass_64.png" alt="icon" height="60" width="60" class="well"></a>
-<!--          <a href="http://opensource.org/"><img src="http://goshakkk.name/images/icons/opensource_64.png" alt="icon" height="60" width="60" class="well"></a>-->
-          <a href="http://heroku.com/"><img src="http://goshakkk.name/images/icons/heroku_64.png" alt="icon" height="60" width="60" class="well"></a>
+<!--           <a href="http://en.wikipedia.org/wiki/Brain"><img src="http://goshakkk.name/images/icons/brain_64.png" alt="icon" class="thumbnail"></a> -->
+<!--           <a href="http://www.apple.com/mac/" class="well"><img src="http://goshakkk.name/images/icons/macbook-black_64.png" alt="icon" class="thumbnail"></a> -->
+<!--          <a href="http://www.apple.com/safari/" class="well"><img src="http://goshakkk.name/images/icons/safari_64.png" alt="icon" class="thumbnail"></a>-->
+          <!--  -->
+<!--          <a href="http://agilebits.com/products/1Password/Mac"><img src="http://goshakkk.name/images/icons/1password_64.png" alt="icon" class="thumbnail"></a>-->
+<!--          <a href="http://culturedcode.com/things/" class="well"><img src="http://goshakkk.name/images/icons/things-app_64.png" alt="icon" class="thumbnail"></a>-->
+<!--          <a href="https://www.dropbox.com/" class="well"><img src="http://goshakkk.name/images/icons/dropbox_64.png" alt="icon" class="thumbnail"></a>-->
+<!--          <a href="http://reederapp.com/mac/" class="well"><img src="http://goshakkk.name/images/icons/reeder_64.png" alt="icon" class="thumbnail"></a>-->
+<!--          <a href="http://www.apple.com/iwork/pages/" class="well"><img src="http://goshakkk.name/images/icons/pages_64.png" alt="icon" class="thumbnail"></a>-->
+<!--           <a href="http://www.panic.com/coda/" class="well"><img src="http://goshakkk.name/images/icons/coda_64.png" alt="icon" class="thumbnail"></a> -->
+<!--          -->
         </nav>
        </section>
        
