@@ -12,10 +12,16 @@
     <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
     <!-- Custom stylesheets -->
     <style>
-      body {
+      #card-container{
         background: url(http://goshakkk.name/images/landing_bg.png) center center;
         padding-top: 55px;
+        padding-bottom: 55px;
       }
+
+      #the-rest {
+        padding-top: 55px;
+      }
+
       .center-text {
         text-align: center;
       }
@@ -84,48 +90,52 @@
     <link rel="apple-touch-icon" href="http://goshakkk.name/apple-touch-icon.png">
   </head>
   <body>
-    <section class="container" id="main-container">
-      <!-- Github Ribbon -->
-      <a href="http://github.com/goshakkk"><img style="position: fixed; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
-      <!-- 8-bit Ruby Logo -->
-      <img src="images/eightbit-ruby.png" alt="icon" style="position: fixed; top: 30px; right: -55px; border: 0; opacity: 0.5;" id="ruby" data-content="Sure." data-original-title="I love Ruby">
-      
-      <header class="hero-unit center-text" itemscope itemtype="http://schema.org/Person">
-        <!-- vCard QR Code -->
-        <section id="vcard-img" style="display: none;">
-          <img src="http://goshakkk.name/images/vcard_qr.png" id="qr" alt="icon">
-        </section>
-        <section id="main-hero-unit">
-          <img itemprop="image" src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar" data-content="Click on the avatar to see its QR code and VCard download link." data-original-title="Need my vCard?">
-          <hgroup>
-            <h1 itemprop="name">Gosha Arinich</h1>
-            <h6 itemprop="jobTitle">Young Geek & Passionate Application Developer</h6>
-          </hgroup>
-          <section id="hero-description">
-            <p itemprop="description">I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
-            <p><small>I enjoy <a href="http://github.com/goshakkk"><img src="http://goshakkk.name/images/icons/octocat_64.png" alt="icon" class="social-icon"> coding</a>, <a href="http://goshakkk.name/blog"> writing to blog</a> and <a href="http://stackoverflow.com/users/708635/goshakkk"><img src="http://goshakkk.name/images/icons/stackoverflow_64.png" alt="icon" class="social-icon"> answering</a>, like to <a href="http://twitter.com/goshakkk"><img src="http://goshakkk.name/images/icons/twitter_64.png" alt="icon" class="social-icon"> tweet</a> and <a href="http://delicious.com/goshakkk"><img src="http://goshakkk.name/images/icons/delicious_64.png" alt="icon" class="social-icon"> bookmark</a>, love to <a href="http://www.last.fm/user/goshakkk"><img src="http://goshakkk.name/images/icons/lastfm_64.png" alt="icon" class="social-icon"> listen to music</a> and <a href="http://www.flickr.com/photos/goshakkk/"><img src="http://goshakkk.name/images/icons/flickr_64.png" alt="icon" class="social-icon"> share photos</a>.<br>
-              I'm on <a href="http://www.linkedin.com/in/goshakkk"><img src="http://goshakkk.name/images/icons/linkedin_64.png" alt="icon" class="social-icon"> LinkedIn</a> by the way.</small></p>
-            <blockquote class="well left-text" id="twitter-blockquote" style="display: none;">
-              <section class="row">
-                <section class="span1">
-                  <img src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar-small">
-                </section>
-                <section class="span12">
-                  <p id="twitter"></p>
-                  <small>Gosha Arinich (<a href="http://twitter.com/goshakkk">@goshakkk</a>)</small>
-                </section>
-              </section>
-            </blockquote>
+    <section id="card-container">
+      <section class="container" id="main-container">
+        <!-- Github Ribbon -->
+        <a href="http://github.com/goshakkk"><img style="position: fixed; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+        <!-- 8-bit Ruby Logo -->
+        <img src="images/eightbit-ruby.png" alt="icon" style="position: fixed; top: 30px; right: -55px; border: 0; opacity: 0.5;" id="ruby" data-content="Sure." data-original-title="I love Ruby">
+        
+        <header class="hero-unit center-text" itemscope itemtype="http://schema.org/Person">
+          <!-- vCard QR Code -->
+          <section id="vcard-img" style="display: none;">
+            <img src="http://goshakkk.name/images/vcard_qr.png" id="qr" alt="icon">
           </section>
-        </section>
-        <!-- vCard download button and description -->
-        <section id="vcard-box" style="display: none;">
-          <p>Here you can download my vCard or just scan its QR code</p>
-          <p><a href="http://goshakkk.name/assets/Gosha%20Arinich.vcf" class="btn primary large">Download vCard</a></p>
-        </section>
-        <p><a itemprop="email" class="btn primary large" href="mailto:me@goshakkk.name">Drop me a line</a> <a class="btn info large" href="http://goshakkk.name/assets/CV.pdf">CV</a></p>
-      </header>
-      
+          <section id="main-hero-unit">
+            <img itemprop="image" src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar" data-content="Click on the avatar to see its QR code and VCard download link." data-original-title="Need my vCard?">
+            <hgroup>
+              <h1 itemprop="name">Gosha Arinich</h1>
+              <h6 itemprop="jobTitle">Young Geek & Passionate Application Developer</h6>
+            </hgroup>
+            <section id="hero-description">
+              <p itemprop="description">I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
+              <p><small>I enjoy <a href="http://github.com/goshakkk"><img src="http://goshakkk.name/images/icons/octocat_64.png" alt="icon" class="social-icon"> coding</a>, <a href="http://goshakkk.name/blog"> writing to blog</a> and <a href="http://stackoverflow.com/users/708635/goshakkk"><img src="http://goshakkk.name/images/icons/stackoverflow_64.png" alt="icon" class="social-icon"> answering</a>, like to <a href="http://twitter.com/goshakkk"><img src="http://goshakkk.name/images/icons/twitter_64.png" alt="icon" class="social-icon"> tweet</a> and <a href="http://delicious.com/goshakkk"><img src="http://goshakkk.name/images/icons/delicious_64.png" alt="icon" class="social-icon"> bookmark</a>, love to <a href="http://www.last.fm/user/goshakkk"><img src="http://goshakkk.name/images/icons/lastfm_64.png" alt="icon" class="social-icon"> listen to music</a> and <a href="http://www.flickr.com/photos/goshakkk/"><img src="http://goshakkk.name/images/icons/flickr_64.png" alt="icon" class="social-icon"> share photos</a>.<br>
+                I'm on <a href="http://www.linkedin.com/in/goshakkk"><img src="http://goshakkk.name/images/icons/linkedin_64.png" alt="icon" class="social-icon"> LinkedIn</a> by the way.</small></p>
+              <blockquote class="well left-text" id="twitter-blockquote" style="display: none;">
+                <section class="row">
+                  <section class="span1">
+                    <img src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar-small">
+                  </section>
+                  <section class="span12">
+                    <p id="twitter"></p>
+                    <small>Gosha Arinich (<a href="http://twitter.com/goshakkk">@goshakkk</a>)</small>
+                  </section>
+                </section>
+              </blockquote>
+            </section>
+          </section>
+          <!-- vCard download button and description -->
+          <section id="vcard-box" style="display: none;">
+            <p>Here you can download my vCard or just scan its QR code</p>
+            <p><a href="http://goshakkk.name/assets/Gosha%20Arinich.vcf" class="btn primary large">Download vCard</a></p>
+          </section>
+          <p><a itemprop="email" class="btn primary large" href="mailto:me@goshakkk.name">Drop me a line</a> <a class="btn info large" href="http://goshakkk.name/assets/CV.pdf">CV</a></p>
+        </header>
+      </section>
+    </section>
+
+    <section class="container" id="the-rest">
       <!-- Why I'm different block -->
       <section class="center-text box" style="margin-bottom: 25px;">
         <header><h2>Why I'm different</h2></header>
