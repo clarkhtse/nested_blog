@@ -10,4 +10,4 @@ source.old
 source/_stash
 source/stylesheets/screen.css
 vendor
-source/Octoblog.esproj
+node_modules
