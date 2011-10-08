@@ -64,6 +64,13 @@
     <!-- Page animations and recent tweet manipulations -->
     <script>
       $(document).ready(function() {
+        // In honor of Steve Jobs
+        var currentDate = new Date();
+        var crm = currentDate.getMonth();
+        var crd = currentDate.getDate();
+        if (crm == 9 && (crd == 5 || crd == 6 || crd == 7 || crd == 8 || crd ==9 || crd == 10 || crd == 11)) {
+          $('#steve').show();
+        }
         // getting recent tweet and showing recent tweet block
         // if rate limit is not reached
         $.getJSON("http://api.twitter.com/1/statuses/user_timeline.json?screen_name=goshakkk&exclude_replies=true&callback=?", function(data) {
@@ -90,6 +97,12 @@
     <link rel="apple-touch-icon" href="http://goshakkk.name/apple-touch-icon.png">
   </head>
   <body>
+    <section style="background-color: #000000; display: none;" id="steve">
+      <h1 style="color: #ffffff;">
+        <img src="http://cdn.tipb.com/images/stories//2011/10/steve-jobs110825134705-560x420.jpg" style="vertical-align: middle;">
+        We're missing you, Steve! <small>~ 1955-2011, RIP</small>
+      </h1>
+    </section>
     <section id="card-container">
       <section class="container" id="main-container">
         <!-- Github Ribbon -->
