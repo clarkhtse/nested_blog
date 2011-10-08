@@ -68,7 +68,7 @@
         var currentDate = new Date();
         var crm = currentDate.getMonth();
         var crd = currentDate.getDate();
-        if (crm == 9 && (crd == 5 || crd == 6 || crd == 7 || crd == 8 || crd ==9 || crd == 10 || crd == 11)) {
+        if (crm == 9 && (crd >= 5 && crd <= 14)) {
           $('#steve').show();
         }
         // getting recent tweet and showing recent tweet block
