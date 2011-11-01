@@ -20,6 +20,20 @@
       p {
         font-family: 'Rosario';
       }
+      .boxed {
+      background: #EFEFEF;
+      -webkit-box-shadow: 1px 1px 0 #CFCFCF, 2px 2px 0 #CFCFCF, 3px 3px 0 #CFCFCF, 4px 4px 0 #CFCFCF, 5px 5px 0 #CFCFCF;
+      -moz-box-shadow: 1px 1px 0 #CFCFCF, 2px 2px 0 #CFCFCF, 3px 3px 0 #CFCFCF, 4px 4px 0 #CFCFCF, 5px 5px 0 #CFCFCF;
+      -webkit-transition: all 0.1s linear;
+      -moz-transition: all 0.1s linear;
+      padding: 20px;
+      }
+      .boxed:hover {
+      -webkit-box-shadow: 1px 1px 0 #AFAFAF, 2px 2px 0 #AFAFAF, 3px 3px 0 #AFAFAF, 4px 4px 0 #AFAFAF, 5px 5px 0 #AFAFAF, 6px 6px 0 #AFAFAF, 7px 7px 0 #AFAFAF, 8px 8px 0 #AFAFAF, 9px 9px 0 #AFAFAF, 10px 10px 0 #AFAFAF;
+      -moz-box-shadow: 1px 1px 0 #AFAFAF, 2px 2px 0 #AFAFAF, 3px 3px 0 #AFAFAF, 4px 4px 0 #AFAFAF, 5px 5px 0 #AFAFAF, 6px 6px 0 #AFAFAF, 7px 7px 0 #AFAFAF, 8px 8px 0 #AFAFAF, 9px 9px 0 #AFAFAF, 10px 10px 0 #AFAFAF;
+      -webkit-transform: translate3d(-5px,-5px,0);
+      -moz-transform: translate3d(-5px,-5px,0);
+      }
       #card-container {
         background: url(images/landing_bg.png) repeat;
         padding-top: 105px;
@@ -29,6 +43,9 @@
         position: relative;
         opacity: 0.95;
         z-index: 100;
+      }
+      #headline {
+        color: #F5474B;
       }
       #the-rest {
         background-color: #ededed;
@@ -107,11 +124,11 @@
         <section class="row">
           <section class="span3"><img itemprop="image" src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar"></section>
           <section class="span10">
-            <header class="hero-unit center-text" itemscope itemtype="http://schema.org/Person" id="main-header">
+            <header class="hero-unit center-text boxed" itemscope itemtype="http://schema.org/Person" id="main-header">
               <section id="main-hero-unit">
                 <hgroup>
                   <h1 itemprop="name">Gosha Arinich</h1>
-                  <h6 itemprop="jobTitle">Young Geek & Passionate Application Developer</h6>
+                  <h6 itemprop="jobTitle" id="headline">Young Geek & Passionate Application Developer</h6>
                 </hgroup>
                 <section id="hero-description">
                   <p itemprop="description">I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
@@ -132,14 +149,15 @@
     <section id="the-rest">
       <section class="container">
         <!-- Why I'm different block -->
-        <section class="center-text box" style="margin-bottom: 25px;">
+        <section class="center-text" style="margin-bottom: 25px;">
           <header><h2>Why I'm different</h2></header>
           <section class="row">
+            <section class="span1">&nbsp;</section>
             <section class="span5">
               <h3><small>Very</small> passionate</h3>
               <p>Yeah, I code with passion in mind. I love the code I write, the tools I use. O love developing so much! Can't imagine my life without it. Actually programming is my life.</p>
             </section>
-            <section class="span6">
+            <section class="span4">
               <h3>Perfectionist <small>inside</small></h3>
               <p>I want the world to be perfect. I do everything I can to reach perfectness. I make things perfect and simple. Both in code and look & feel. And I enjoy doing it.
             </section>
@@ -147,20 +165,20 @@
               <h3>Trends follower</h3>
               <p>I follow new technologies. I learn them hard to know brilliant, I learn with fun. I use them in production. I know them well.</p>
             </section>
+            <section class="span1">&nbsp;</section>
           </section>
         </section>
-        
-        <hr>
         
         <!-- Core skills block -->
         <section class="center-text" style="margin-bottom: 45px;">
           <header><h2>Core skills</h2></header>
           <section class="row">
+            <section class="span1">&nbsp;</section>
             <section class="span5">
               <h3><small>Intelligent</small> code</h3>
               <p>Of course, I can write code. I make it perfect, I comment it well. I really want to make my code easy-understandable to other developers. I also follow <strong>best practices</strong> when writing the code.</p>
             </section>
-            <section class="span6">
+            <section class="span4">
               <h3><small>System</small> administration</h3>
               <p>How can developer and geek live without system administration skills? I have basic sysadmin skills, as I'm mostly developer, but I attempt to be able to deploy apps and administrate the whole stack myself.</p>
             </section>
@@ -168,6 +186,7 @@
               <h3><small>Minimalistic</small> UI design</h3>
               <p>I make very minimalistic UI's so anybody can understand them. But I make them powerful so advanced users don't feel themselves abandoned.</p>
             </section>
+            <section class="span1">&nbsp;</section>
           </section>
         </section>
     </section>
