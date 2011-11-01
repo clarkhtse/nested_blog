@@ -93,43 +93,20 @@
       })();
     </script>
     
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-    <script>
-      $(document).ready(function() {
-        // In honor of Steve Jobs
-        var currentDate = new Date();
-        var crm = currentDate.getMonth();
-        var crd = currentDate.getDate();
-        if (crm == 9 && (crd >= 5 && crd <= 14)) {
-          $('#steve').show();
-        }
-        // hiding main container
-        $('body').hide();
-        // and showing it with very very slow fade animation
-        $('body').fadeIn(4000);
-      }); 
-    </script>
-    
     <link rel="shortcut icon" href="http://goshakkk.name/favicon.png">
     <link rel="apple-touch-icon" href="http://goshakkk.name/apple-touch-icon.png">
   </head>
   <body>
-    <section style="background-color: #000000; display: none;" id="steve">
-      <h1 style="color: #ffffff;">
-        <img src="http://cdn.tipb.com/images/stories//2011/10/steve-jobs110825134705-560x420.jpg" style="vertical-align: middle;">
-        We're missing you, Steve! <small>~ 1955-2011, RIP</small>
-      </h1>
-    </section>
     <section id="card-container">
       <section class="container" id="main-container">
         <!-- Github Ribbon -->
         <a href="http://github.com/goshakkk"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
         <!-- 8-bit Ruby Logo -->
         <img src="images/eightbit-ruby.png" alt="icon" style="position: absolute; top: 30px; right: 0px; border: 0; opacity: 0.5;" id="ruby" data-content="Sure." data-original-title="I love Ruby">
-        <section class="row">
+        <section class="row" itemscope itemtype="http://schema.org/Person">
           <section class="span3"><img itemprop="image" src="http://goshakkk.name/images/eightbit-avatar.png" alt="icon" id="avatar"></section>
           <section class="span10">
-            <header class="hero-unit center-text boxed" itemscope itemtype="http://schema.org/Person" id="main-header">
+            <header class="hero-unit center-text boxed" id="main-header">
               <section id="main-hero-unit">
                 <hgroup>
                   <h1 itemprop="name">Gosha Arinich</h1>
@@ -138,10 +115,10 @@
                 <section id="hero-description">
                   <p itemprop="description">I'm a geek and fucking awesome developer who cares about perfect code, who can't live without learning new technologies and practices. Yep, it's me.</p>
                   <p><a href="http://github.com/goshakkk"><img src="http://goshakkk.name/images/icons/octocat_64.png" alt="icon" class="social-icon"></a> <a href="http://twitter.com/goshakkk"><img src="http://goshakkk.name/images/icons/twitter_64.png" alt="icon" class="social-icon"></a></p>
+                  <p><small>I <a href="http://goshakkk.name/blog">blog</a> from time to time.</small></p>
+                  <p>The best way to contact me is via email: <a itemprop="email" href="mailto:me@goshakkk.name">me@goshakkk.name</a>.</p>
                 </section>
               </section>
-              <p><small>I <a href="http://goshakkk.name/blog">blog</a> from time to time.</small></p>
-              <p>The best way to contact me is via email: <a itemprop="email" href="mailto:me@goshakkk.name">me@goshakkk.name</a>.</p>
               <!-- Let's leave CV hidden -->
 <!--              <p>P.S. Here's my <a href="http://goshakkk.name/assets/CV.pdf">CV</a></p>-->
             </header>
