@@ -1,0 +1,46 @@
+---
+layout: default
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Gosha Arinich</title>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta property="og:type" content="blog">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="http://cachedcommons.org/cache/modernizr/1.5.0/javascripts/modernizr-min.js"></script>
+</head>
+<body id="index" class="home">
+  <header>
+    <div class="container">
+      <div class="sixteen columns">
+        <h1><a href="."><img src="http://goshakkk.name/images/eightbit-avatar.png">Gosha Arinich</a></h1>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <div class="row">
+      <div class="sixteen columns">
+        <section id="content">
+          <ul id="post-list">
+            {% for post in site.posts %}
+            <li>
+              <abbr class="published" title="{{ post.date }}">
+                <a href="{{ post.url }}">{{ post.date | date: "%B %e, %Y" }}</a>
+              </abbr>
+              <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
