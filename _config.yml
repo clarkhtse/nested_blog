@@ -1,6 +1,6 @@
-# This is the default format. 
+# This is the default format.
 # For more see: https://github.com/mojombo/jekyll/wiki/Permalinks
-permalink: /:title 
+permalink: /:title
 
 exclude: [".rvmrc", ".rbenv-version", "README.md", "Rakefile", "changelog.md"]
 auto: true
@@ -16,7 +16,7 @@ author:
   feedburner: GoshaArinich
 
 # The production_url is only used when full-domain names are needed
-# such as sitemap.txt 
+# such as sitemap.txt
 # Most places will/should use BASE_PATH to make the urls
 production_url: http://goshakkk.name/
 
@@ -70,11 +70,11 @@ JB:
   # Set 'provider' to the analytics provider you want to use.
   # Set 'provider' to false to turn analytics off globally.
   analytics:
-    provider: false 
-    mixpanel:
-        token: '_MIXPANEL_TOKEN_'
+    provider: gauges
+    gauges:
+      tracking_id: '4fd5fa55613f5d40d700002a'
 
-  # Settings for sharing helper. 
+  # Settings for sharing helper.
   # Sharing is for things like tweet, plusone, like, reddit buttons etc.
   # Set 'provider' to the sharing provider you want to use.
   # Set 'provider' to false to turn sharing off globally.
@@ -85,7 +85,7 @@ JB:
   # a hash with key named for the given helper. ex:
   #
   #   pages_list:
-  #     provider: "custom"   
+  #     provider: "custom"
   #
   # Setting any helper's provider to 'custom' will bypass the helper code
   # and include your custom code. Your custom file must be defined at:
