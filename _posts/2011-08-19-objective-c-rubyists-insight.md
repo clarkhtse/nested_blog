@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Objective-C: Rubyist's insight"
-published: false
+published: true
 ---
 
 
