@@ -1,6 +1,9 @@
 ---
 layout: post
+title: Freelancing
+published: true
 ---
+
 
 I've been freelancing for a short time now. Just wanted to try myself at it, maybe create some interesting real-world projects & earn some money. I'd like to share my thoughts on it.
 
@@ -31,3 +34,4 @@ For most clients it's also convenient to have their apps hosted on Heroku. So th
 I tend to think that while freelancing I have quite more spare time. Yeah, really.
 
 Freelancing also gives me some feel of freedom: work for whoever you want, work whenever you want, work as much as you want. Do whatever you want.
+
