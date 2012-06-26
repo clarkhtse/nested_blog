@@ -1,7 +1,9 @@
 ---
 layout: post
-title: "Objective-C: Rubyist's Insight"
+title: "Objective-C: Rubyist's insight"
+published: false
 ---
+
 
 ## Intro
 ![](http://habrastorage.org/storage1/9e3f6a48/f3ee30bb/18d4ea06/4208aa40.png)
