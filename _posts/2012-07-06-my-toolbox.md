@@ -4,11 +4,11 @@ title: My toolbox
 published: true
 ---
 
-I haven't written here anything in a while. Whatever, I'd like to describe toolbox and setup.
+I haven't written here anything in a while. Whatever, I'd like to describe my toolbox and setup.
 
 ### Hardware
 
-First of all, most of magic happens on my Macbook Air 13". When I'm not on the go, or laying on the couch, the Macbook is hooked up with Thunderbolt Display.
+First of all, most of magic happens on my Macbook Air 13". When I'm not on the go, or laying on the couch, the Macbook is hooked up to Thunderbolt Display.
 
 ![Macbook Air & Thunderbolt Display](http://f.cl.ly/items/1S3s330j0X001e0n2d14/Image%202012.08.06%204:46:01%20PM.png)
 
@@ -70,7 +70,7 @@ Most of times, I'm using the following stack:
 
 Whatsoever, I'm currently taking at [Backbone.js](http://backbonejs.org), [Underscore.js](http://underscorejs.org), [Chaplin](https://github.com/chaplinjs/chaplin), [Brunch](http://brunch.io), [CoffeeScript](http://coffeescript.org), [Less](http://lesscss.org), [Handlebars](http://handlebarsjs.com) for client side, which is a **simple, separate aplication**, depending only on backend app API.
 
-Nevertheless, I don't like being locked into one language, I want to be polyglotic. I'm playing with a whole lot of different technologies in my spare time — [Node.js](http://nodejs.org), [Scala](http://www.scala-lang.org), [Erlang](http://www.erlang.org)/[Elixir](http://elixir-lang.org), [Clojure](http://clojure.org). (And whenever some of those make specific taks better than Ruby, I'm using it over Ruby. So in my recent client app I've got a zoo of a few apps — backend Rails app, utility Node.js application, communicating via REST API/[Pusher](http://pusher.com) with frontend Backbone app.)
+Nevertheless, I don't like being locked into one language, I want to be a polyglot. I'm playing with a whole lot of different technologies in my spare time — [Node.js](http://nodejs.org), [Scala](http://www.scala-lang.org), [Erlang](http://www.erlang.org)/[Elixir](http://elixir-lang.org), [Clojure](http://clojure.org). (And whenever some of those make specific taks better than Ruby, I'm using it over Ruby. So in my recent client app I've got a zoo of a few apps — backend Rails app, utility Node.js application, communicating via REST API/[Pusher](http://pusher.com) with frontend Backbone app.)
 
 When building apps, I follow the [Twelve-Factor App methodology](http://www.12factor.net).
 
