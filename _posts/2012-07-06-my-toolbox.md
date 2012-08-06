@@ -18,10 +18,10 @@ Macbook Air is really a beautiful, appealing thing. Not only it's a piece of har
 
 My OS of choice is, not hard to guess, OS X. Compared to Windows, its main pro is, it's the real **UNIX**, meaning I have my lovely terminal there, and all UNIX tools. (I can't even imagine myself working without that.)
 
-A few pros over both Windows and different Linux distros:
+A few pros of OS X over both Windows and different Linux distros:
 
 * **UI/UX**, the one I really like it for. Stylish, elegant, Made For Humans™
-* could be a part of previous, but I'd rather write it separately: **font rendering**. If you've ever seen how texts are rendered on Macs, I doubt you'll be able to look at how they are rendered on Windows/Linux machines without your eyes bleeding.
+* could be a part of previous, but I'd rather write it separately: **font rendering**. If you've ever seen how texts are rendered on Macs, I doubt you'll be able to look at how they are rendered on Windows/Linux machines without your eyes bleeding
 * nice **application ecosystem**
 
 *(Shortly: I really do care about simplicily, power, and aethetics at the same time.)*
@@ -32,7 +32,7 @@ My entire development environment can be bootstrapped on any Mac with single com
 
     bash -c "$(curl -L https://raw.github.com/goshakkk/babushka-deps/master/install.sh)"
     
-Brew for packages stuff.
+[Brew](http://mxcl.github.com/homebrew/) for packages stuff.
     
 I use Terminal.app and zsh as my shell, with [oh my zsh](https://github.com/robbyrussell/oh-my-zsh/). Vim is my editor of choice, with [janus](https://github.com/carlhuda/janus). (Here are my [dotfiles](https://github.com/goshakkk/dotfiles).)
 
