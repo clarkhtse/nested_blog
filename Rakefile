@@ -1,9 +1,9 @@
-require "rubygems"
+require 'rubygems'
 require 'rake'
 require 'yaml'
 require 'time'
 
-SOURCE = "."
+SOURCE = '.'
 CONFIG = {
   'version' => "0.2.13",
   'themes' => File.join(SOURCE, "_includes", "themes"),
@@ -24,7 +24,7 @@ module JB
       :theme_packages => "_theme_packages",
       :posts => "_posts"
     }
-    
+
     def self.base
       SOURCE
     end
@@ -36,9 +36,8 @@ module JB
       path.compact!
       File.__send__ :join, path
     end
-  
-  end #Path
-end #JB
+  end
+end
 
 # Usage: rake post title="A Title" [date="2012-02-09"]
 desc "Begin a new post in #{CONFIG['posts']}"
@@ -56,7 +55,7 @@ task :post do
   if File.exist?(filename)
     abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
   end
-  
+
   puts "Creating new post: #{filename}"
   open(filename, 'w') do |post|
     post.puts "---"
@@ -68,7 +67,7 @@ task :post do
     post.puts "---"
     post.puts "{% include JB/setup %}"
   end
-end # task :post
+end
 
 # Usage: rake page name="about.html"
 # You can also specify a sub-directory path.
@@ -82,7 +81,7 @@ task :page do
   if File.exist?(filename)
     abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
   end
-  
+
   mkdir_p File.dirname(filename)
   puts "Creating new page: #{filename}"
   open(filename, 'w') do |post|
@@ -93,18 +92,17 @@ task :page do
     post.puts "---"
     post.puts "{% include JB/setup %}"
   end
-end # task :page
+end
 
 desc "Launch preview environment"
 task :preview do
   system "jekyll --auto --server"
-end # task :preview
+end
 
 # Public: Alias - Maintains backwards compatability for theme switching.
 task :switch_theme => "theme:switch"
 
 namespace :theme do
-  
   # Public: Switch from one theme to another for your blog.
   #
   # name - String, Required. name of the theme you want to switch to.
@@ -139,16 +137,16 @@ namespace :theme do
           page.puts "---"
           page.puts "layout: default"
           page.puts "---"
-        end 
+        end
         page.puts "{% include JB/setup %}"
         page.puts "{% include themes/#{theme_name}/#{File.basename(filename)} %}" 
       end
     end
-    
+
     puts "=> Theme successfully switched!"
     puts "=> Reload your web-page to check it out =)"
-  end # task :switch
-  
+  end
+
   # Public: Install a theme using the theme packager.
   # Version 0.1.0 simple 1:1 file matching.
   #
@@ -172,18 +170,18 @@ namespace :theme do
     end
 
     packaged_theme_path = JB::Path.build(:theme_packages, :node => name)
-    
+
     abort("rake aborted!
       => ERROR: 'name' cannot be blank") if name.empty?
-    abort("rake aborted! 
+    abort("rake aborted!
       => ERROR: '#{packaged_theme_path}' directory not found.
       => Installable themes can be added via git. You can find some here: http://github.com/jekyllbootstrap
       => To download+install run: `rake theme:install git='[PUBLIC-CLONE-URL]'`
       => example : rake theme:install git='git@github.com:jekyllbootstrap/theme-the-program.git'
     ") unless FileTest.directory?(packaged_theme_path)
-    
+
     manifest = verify_manifest(packaged_theme_path)
-    
+
     # Get relative paths to packaged theme files
     # Exclude directories as they'll be recursively created. Exclude meta-data files.
     packaged_theme_files = []
@@ -193,7 +191,7 @@ namespace :theme do
         packaged_theme_files << f 
       }
     }
-    
+
     # Mirror each file into the framework making sure to prompt if already exists.
     packaged_theme_files.each do |filename|
       file_install_path = File.join(JB::Path.base, filename)
@@ -204,7 +202,7 @@ namespace :theme do
         cp_r File.join(packaged_theme_path, filename), file_install_path
       end
     end
-    
+
     puts "=> #{name} theme has been installed!"
     puts "=> ---"
     if ask("=> Want to switch themes now?", ['y', 'n']) == 'y'
@@ -217,7 +215,7 @@ namespace :theme do
   # In other words packaging is essentially the reverse of installing.
   #
   # name - String, Required name of the theme you want to package.
-  #        
+  #
   # Examples
   #
   #   rake theme:package name="twitter"
@@ -232,12 +230,12 @@ namespace :theme do
     abort("rake aborted: name cannot be blank") if name.empty?
     abort("rake aborted: '#{theme_path}' directory not found.") unless FileTest.directory?(theme_path)
     abort("rake aborted: '#{asset_path}' directory not found.") unless FileTest.directory?(asset_path)
-    
+
     ## Mirror theme's template directory (_includes)
     packaged_theme_path = JB::Path.build(:themes, :root => JB::Path.build(:theme_packages, :node => name))
     mkdir_p packaged_theme_path
     cp_r theme_path, packaged_theme_path
-    
+
     ## Mirror theme's asset directory
     packaged_theme_assets_path = JB::Path.build(:theme_assets, :root => JB::Path.build(:theme_packages, :node => name))
     mkdir_p packaged_theme_assets_path
@@ -248,18 +246,17 @@ namespace :theme do
     open(JB::Path.build(:theme_packages, :node => "#{name}/packager.yml"), "w") do |page|
       page.puts packager.to_yaml
     end
-    
+
     puts "=> '#{name}' theme is packaged and available at: #{JB::Path.build(:theme_packages, :node => name)}"
   end
-  
-end # end namespace :theme
+end
 
 # Internal: Download and process a theme from a git url.
 # Notice we don't know the name of the theme until we look it up in the manifest.
 # So we'll have to change the folder name once we get the name.
 #
 # url - String, Required url to git repository.
-#        
+#
 # Returns theme manifest hash
 def theme_from_git_url(url)
   tmp_path = JB::Path.build(:theme_packages, :node => "_tmp")
@@ -279,7 +276,7 @@ end
 # Internal: Process theme package manifest file.
 #
 # theme_path - String, Required. File path to theme package.
-#        
+#
 # Returns theme manifest hash
 def verify_manifest(theme_path)
   manifest_path = File.join(theme_path, "manifest.yml")
@@ -304,5 +301,5 @@ def get_stdin(message)
   STDIN.gets.chomp
 end
 
-#Load custom rake scripts
+# Load custom rake scripts
 Dir['_rake/*.rake'].each { |r| load r }

@@ -2,7 +2,6 @@
 layout: page
 title: Gosha Arinich
 ---
-{% include JB/setup %}
 
 Hi, I'm Gosha Arinich. I'm an young geek and passionate application
 developer. I like to [code](http://github.com/{{ site.author.github }})
