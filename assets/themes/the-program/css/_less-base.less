@@ -42,8 +42,8 @@ Font families
 No styleguide reference.
 */
 
-@font-stack: consolas, monaco, monospace;
-@webfont: UbuntuMono-B, consolas, monaco, monospace;
+@font-stack: Open Sans, consolas, monaco, monospace;
+@webfont: PT Sans, consolas, monaco, monospace;
 
 /*
 Base font size should be larger than 16px.
@@ -101,8 +101,8 @@ small, .small, aside { font-size: 0.75 * (@font-size / @em); }
 
 blockquote { font-weight: bold; }
 blockquote cite { font-weight: normal; }
-strong { font-weight: bold; }
-em { font-weight: bold; }
+strong { font-weight: 600; }
+em { font-weight: 600; }
 
 /*
 Color schemes
@@ -150,21 +150,6 @@ No styleguide reference.
 
 @noise-100-90-5: "/assets/themes/the-program/skin/100-90-5-monochrome.png"; // http://noisepng.com/
 @cross-hair: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAR0lEQVQYGYVOQQoAIAizHuJXpafqR4wFCw9Ggji2OSbubpkp3UI7Qmcidz9JIKniAYITEQasqovcJHhelquxFf9LVjfTeKFtWPOYLQ+xHqUAAAAASUVORK5CYII="; // http://ptrn.it/AmYV5d
-
-/* COMFORTAA Font
- * http://www.fontsquirrel.com/fonts/Comfortaa
-*/
-
-@font-face {
-    font-family: 'UbuntuMono-B';
-    src: url('/assets/themes/the-program/font/UbuntuMono-B-webfont.eot');
-    src: url('/assets/themes/the-program/font/UbuntuMono-B-webfont.eot?#iefix') format('embedded-opentype'),
-         url('/assets/themes/the-program/font/UbuntuMono-B-webfont.woff') format('woff'),
-         url('/assets/themes/the-program/font/UbuntuMono-B-webfont.ttf') format('truetype'),
-         url('/assets/themes/the-program/font/UbuntuMono-B-webfont.svg#UbuntuMono-B') format('svg');
-    font-weight: normal !important;
-    font-style: normal;
-}
 
 /*
 LESS helper
