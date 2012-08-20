@@ -19,7 +19,7 @@ author:
 # The production_url is only used when full-domain names are needed
 # such as sitemap.txt
 # Most places will/should use BASE_PATH to make the urls
-production_url: http://goshakkk.name/
+production_url: http://goshakkk.name
 
 JB:
   version: 0.2.13
