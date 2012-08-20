@@ -8,9 +8,9 @@ I haven't written here anything in a while. Whatever, I'd like to describe my to
 
 ### Hardware
 
-First of all, most of magic happens on my Macbook Air 13". When I'm not on the go, or laying on the couch, the Macbook is hooked up to Thunderbolt Display.
-
 ![Macbook Air & Thunderbolt Display](http://f.cl.ly/items/1S3s330j0X001e0n2d14/Image%202012.08.06%204:46:01%20PM.png)
+
+First of all, most of magic happens on my Macbook Air 13". When I'm not on the go, or laying on the couch, the Macbook is hooked up to Thunderbolt Display.
 
 Macbook Air is really a beautiful, appealing thing. Not only it's a piece of hardware, but also the awesome experience. Small, thin, light, fast.
 
@@ -28,7 +28,7 @@ A few pros of OS X over both Windows and different Linux distros:
 
 ### Dev environment
 
-My entire development environment can be bootstrapped on any Mac with single command:
+My entire development environment can be bootstrapped on any Mac with a single command[^1]:
 
     bash -c "$(curl -L https://raw.github.com/goshakkk/babushka-deps/master/install.sh)"
     
@@ -36,15 +36,15 @@ My entire development environment can be bootstrapped on any Mac with single com
     
 I use Terminal.app and zsh as my shell, with [oh my zsh](https://github.com/robbyrussell/oh-my-zsh/). Vim is my editor of choice, with [janus](https://github.com/carlhuda/janus). (Here are my [dotfiles](https://github.com/goshakkk/dotfiles).)
 
-My favorite coding/terminal color scheme is [Solarized](http://ethanschoonover.com/solarized). Choice of Light/Dark one depends on whenever the project I'm working on is personal or for client.
-
 ![VIM](http://f.cl.ly/items/3I1N3Q1q0x080x0P463W/Screen%20Shot%202012-08-06%20at%205.48.40%20PM.png)
 
-Rack/Rails, node.js apps are run through [Pow](http://pow.cx) — while Pow supports the former natively, I'm using simple Pow port forwarding for the latter kind of apps.
+My favorite coding/terminal color scheme is [Solarized](http://ethanschoonover.com/solarized). Choice of Light/Dark one depends on whenever I'm working on a perosnal or client project.
 
-I also run a [manservant](https://github.com/jimeh/manservant) instance using Pow on `man.dev`. With it, I'm able to look up manpages right from Safari.
+Rack/Rails, node.js apps are run through [Pow](http://pow.cx).
 
 ![manservant](http://f.cl.ly/items/0B3T0F022e0e2T2R1k2x/Screen%20Shot%202012-08-06%20at%205.26.30%20PM.png)
+
+I also run a [manservant](https://github.com/jimeh/manservant) instance using Pow on `man.dev`. With it, I'm able to look up manpages right from Safari.
 
 Obviously, my personal & client apps are on Github. Github is especially useful for client app development — each repo has got a wiki for some project-related documents, Issues are awesome for both tracking bugs, offering new features, having discussions, and managing milestones.
 
@@ -87,3 +87,7 @@ I track exceptions with [Airbrake](https://addons.heroku.com/airbrake), store an
 Safari for browsing, [Tweetbot](http://tapbots.com/tweetbot_mac/) as Twitter client app, still Sparrow for email, iTunes for music, [Aperture](http://apple.com/aperture/) for photos, [1Password](https://agilebits.com/onepassword) for password management, [Reeder](http://reederapp.com/)/[Prismatic](http://getprismatic.com) for news, [Readability](http://www.readability.com/) for read-it-later thing, [Cloud](http://getcloudapp.com) app for screenshot sharing, [Flint](http://giantcomet.com/flint/) as [Campfire](http://campfirenow.com) client, [Grandview](http://www.darkheartfelt.com/grandview) for focused writing, [Divvy](http://mizage.com/divvy/) for window management, [Bartender](http://www.macbartender.com), [Eon](http://fuelcollective.com/eon) as client for [Freckle](http://letsfreckle.com), [OhLife](https://ohlife.com) for some sort of journal.
 
 I also store my backups and photo library on 2Tb [Time Capsule](http://www.apple.com/timecapsule/).
+
+[^1]: it uses [babushka](http://babushka.me) to bootstrap the
+environment. Here are my
+[babushka-deps](https://github.com/goshakkk/babushka-deps)
