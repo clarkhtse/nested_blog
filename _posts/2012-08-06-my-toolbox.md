@@ -90,4 +90,4 @@ I also store my backups and photo library on 2Tb [Time Capsule](http://www.apple
 
 [^1]: it uses [babushka](http://babushka.me) to bootstrap the
 environment. Here are my
-[babushka-deps](https://github.com/goshakkk/babushka-deps)
+[babushka-deps](https://github.com/goshakkk/babushka-deps).
