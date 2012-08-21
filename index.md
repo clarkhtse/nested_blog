@@ -3,9 +3,17 @@ layout: page
 title: Gosha Arinich
 ---
 
-Hi, I'm Gosha Arinich. I'm an young geek and passionate application
-developer. I like to [code](http://github.com/{{ site.author.github }})
-and receive [emails](mailto:{{ site.author.email }}) from awesome people.
+<p class="large">Hello! I'm a passionate and curious application developer.</p>
+
+You can look at my code on [github](http://github.com/{{ site.author.github }}),
+follow me on [twitter](http://twitter.com/{{ site.author.twitter }}), and
+[email](mailto:{{ site.author.email }}) me.
+
+{% if site.author.available_for_hire %}
+[I am currently available for limited freelance work](mailto:{{ site.author.email }}).
+{% endif %}
+
+### Blog posts
 
 <ul class="posts">
   {% for post in site.posts %}
