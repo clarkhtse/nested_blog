@@ -1,6 +1,7 @@
 ---
 layout: post
 title: On being a polyglot
+hn: "http://news.ycombinator.com/item?id=4414789"
 published: true
 ---
 
