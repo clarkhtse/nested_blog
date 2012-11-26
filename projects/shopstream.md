@@ -5,7 +5,7 @@ title: ShopStream
 
 ## ShopStream Case Study
 
-[![ShopStream](http://cl.ly/image/2I2L2J3l0h47/download)](http://shopstream.co)
+[![ShopStream](http://f.cl.ly/items/0h1l2h3N0z142p0G1s2L/ShopStream.jpg)](http://shopstream.co)
 
 [ShopSream](http://shopstream.co/) is an e-commerce analytics solution
 as a service. It provides shop owners with useful stats updated in

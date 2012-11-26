@@ -12,7 +12,7 @@ as a service. It provides shop owners with useful stats updated in
 real-time. ShopStream has dead-easy Shopify integration and smooth setup
 process for other platforms.
 
-[![ShopStream](http://cl.ly/image/2I2L2J3l0h47/download)](/projects/shopstream.html)
+[![ShopStream](http://f.cl.ly/items/0h1l2h3N0z142p0G1s2L/ShopStream.jpg)](/projects/shopstream.html)
 
 ### myeverwrite
 
@@ -20,4 +20,4 @@ process for other platforms.
 freelance writing. Its primary audience is online and offline publishers
 which want to employ writers on a freelance basis.
 
-![myeverwrite](http://cl.ly/image/1F3A3r20082X/download)
+[![myeverwrite](http://f.cl.ly/items/3T3c1R302i20412m3v2g/myeverwrite.jpg)](http://myeverwrite.com/)
