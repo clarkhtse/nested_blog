@@ -1,9 +1,7 @@
 ---
 layout: page
-title: ShopStream
+title: ShopStream Case Study
 ---
-
-## ShopStream Case Study
 
 [![ShopStream](http://f.cl.ly/items/0h1l2h3N0z142p0G1s2L/ShopStream.jpg)](http://shopstream.co)
 

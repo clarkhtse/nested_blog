@@ -1,5 +1,11 @@
 ---
 layout: default
+header_class: compact
 ---
-{% include JB/setup %}
-{% include themes/the-program/page.html %}
+
+<article>
+  <header>
+    <h2><a href="{{ page.url }}">{{ page.title }}</a></h2>
+  </header>
+  {{ content }}
+</article>
