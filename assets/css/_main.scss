@@ -45,6 +45,7 @@ h3, h4 {
 }
 
 body > section {
+  box-sizing: border-box;
   margin: 0 auto;
   min-width: $min-width;
   max-width: $width;
@@ -126,6 +127,7 @@ code {
 
 body > header {
   .container {
+    box-sizing: border-box;
     margin: 0 auto;
     min-width: $min-width;
     max-width: $width;
