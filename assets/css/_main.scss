@@ -231,6 +231,7 @@ body > header {
 }
 
 body > footer {
+  box-sizing: border-box;
   margin: 10px auto 40px;
   min-width: $min-width;
   max-width: $width;
