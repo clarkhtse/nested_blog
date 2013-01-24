@@ -13,7 +13,7 @@ The terms I use in the article:
 
 From the standpoint of the users of analytic systems, there is only one thing to be done to enjoy their numbers, charts, and so on — that thing is to track events they are interested in. New page load, item added to the cart, check out.
 
-As I have explored, there are basically two options of tracking those events at programatic level.
+As I have explored, there are basically two options of tracking those events at programmatic level.
 
 ### "Why do we need the original payload"
 
@@ -55,6 +55,6 @@ Yes, there are downsides:
 
 There is no single "right" way after all. It's all about trade-offs — deciding what is important for *your* system and what can be left off in favor of something else.
 
-Speaking of ShopStream — we have decided to take the latter approach. We are constantly change our views on what metrics we need and are planning on some really neat features that require events being present in their raw view.
+Speaking of ShopStream — we have decided to take the latter approach. We are constantly changing our views on what metrics we need and are planning on some really neat features that require events being present in their raw view.
 
 I'm planning on writing a follow-up post on processing tracked events. Keep posted.
