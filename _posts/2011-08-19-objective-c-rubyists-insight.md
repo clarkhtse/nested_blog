@@ -22,11 +22,15 @@ Everything is an object in Ruby. This isn't always true for Objective-C. As Obje
 ## 3. Sending messages
 In Ruby, when we call an object method we actually send a message to the object
 
-    object.send :method, args
+```ruby
+object.send :method, args
+```
 
 That is, the method call is converted to sending a message. The same thing happens with Objective-C
 
-    [object method];
+```objective-c
+[object method];
+```
 
 This is exactly sending of a message, not a method call, 'cause if we call a non-existent method we don't get any errors at compile time, only at runtime (that proves that Objective-C is dynamic too). At compile time `[object method]` is converted to C-call of `objc_sendMsg(id object, SEL selector)` function.
 If you use [clang3](http://clang.llvm.org/), it can return errors at compile time.
@@ -39,11 +43,15 @@ Okay it's well. But what with C-types? No, it doesn't work for C-types, only for
 In Ruby we just define a class, in Objective-C we have to write both interface and realization for our class. In Ruby we can define any i-var from any method, in Objective-C we have to declare all i-vars we are going to use in an interface file.
 An objects are created easily in both langs. In Ruby we just send `new` message to the class
 
-    myObject = MyClass.new
+```ruby
+myObject = MyClass.new
+```
 
 In Objective-C we need to allocate memory for the object (`alloc`) and then to initialize it (with `init` or `initWith...` method)
 
-    MyClass * myObject = [[MyClass alloc] init];
+```objective-c
+MyClass * myObject = [[MyClass alloc] init];
+```
 
 If we wanna get access i-vars we define getter and setter methods. In Ruby we just write `attr_accessor :var` inside class definition, in Objective-C we write `type * variableName` inside i-vars definition block, `@property(retain) type * variableName` after methods definition, and `@synthesize variableName` inside class realization file.
 
@@ -57,23 +65,27 @@ And for example we can implement a method that can take any object that realizes
 ## 7. Categories and class extension
 If we wanna extend a Ruby class, we can simply write
 
-    class String
-      def hello_world
-        "Hey"
-      end
-    end
+```ruby
+class String
+  def hello_world
+    "Hey"
+  end
+end
+```
 
 That way we added `hello_world` method to `String` class (but we can do so in many ways). In Objective-C we can do something similar using categories
 
-    @interface NSString (HelloWorld)
-    + (NSString *)helloWorld;
-    @end
-    @implementation NSString (HelloWorld)
-    + (NSString *)helloWorld
-    {
-      return @"Hey";
-    }
-    @end
+```objective-c
+@interface NSString (HelloWorld)
++ (NSString *)helloWorld;
+@end
+@implementation NSString (HelloWorld)
++ (NSString *)helloWorld
+{
+  return @"Hey";
+}
+@end
+```
 
 Usually categories are saved in files named like `ClassToBeExtended+CategoryName` -- e.g. `NSString+HelloWorld.h` and `NSString+HelloWorld.m`, and then are imported.
 
