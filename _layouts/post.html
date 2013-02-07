@@ -9,4 +9,8 @@ header_class: compact
     <p class="date">{{ page.date | date_to_string }}</p>
   </header>
   {{ content }}
+
+  {% if page.hn %}
+    <p><i><a href="{{ page.hn }}">Discuss this post on HN</a>.</i></p>
+  {% endif %}
 </article>
