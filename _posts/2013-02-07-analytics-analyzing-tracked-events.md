@@ -2,6 +2,7 @@
 layout: post
 title: "Analytics: Analyzing tracked events"
 published: true
+hn: http://news.ycombinator.com/item?id=5182625
 ---
 
 In previous article, I've shown two essential ways the events get tracked. 
