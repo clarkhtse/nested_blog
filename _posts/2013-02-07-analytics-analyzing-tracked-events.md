@@ -9,21 +9,21 @@ In previous article, I've shown two essential ways the events get tracked.
 
 Now, I would like to focus on the latter event of tracking — storing all the event data, and analyzing it ad-hoc afterwards. 
 
-It is important to analyze data in the fastest, yet powerful way. And that is the main concern of this post. 
+It is important to analyze data in the fastest fashion, while preserving the power. That's the main concern of this post. 
 
-We would brake that down using the shop tracking system as an example. It would track only one kind of event — orders. To keep the samples simple, we'll only calculate these gauges:
+We'd explore more about that using the shop tracking system as an example. It would track only one kind of event — orders. To keep the samples simple, we'll only calculate these metrics:
 
 * average purchase total
 * top products
 
-The structure of the event document would be like follows:
+The structure of the event document would be as follows:
 
 * total — float order total
 * line items — array with elements like:
   * sku — string product sku
   * price — float item price
 
-For sake of this example, we will perform different analysis methods against a set of 1,000,000 of such order events, with each having 5 line items on average.
+For the sake of this example, we will perform different analysis methods against a set of 1,000,000 of such order events, with each having 5 line items on average.
 
 We'll use MongoDB as schema-less documents are the fit for storing events and also because of its powerful analytics functionalities. Worth noticing that those features will mainly be described in light of their application to described tasks.
 
@@ -212,9 +212,9 @@ Running it, we can notice great speed improvement compared to any of previously 
 
 ### Possible optimization techniques
 
-Whatever method you end up using, it is wise to apply some optimization to gauge calculation.
+Whatever method you end up using, it is wise to apply some optimization to metric calculation.
 
-Computing your gauges on every access to them would be super-dumb. Instead, once calculated, their value should be cached and always returned unless the gauge dependencies change.
+Computing your metrics on every access to them would be super-dumb. Instead, once calculated, their value should be cached and always returned unless the metric dependencies change.
 
 In our examples, caches should be invalidated only when a new order is tracked.
 
