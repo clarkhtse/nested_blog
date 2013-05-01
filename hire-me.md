@@ -1,7 +1,6 @@
 ---
 layout: page
 title: Hire me for your next project
-header: Hire me for your next project
 --- 
 
 Gosha is a freelance Ruby developer available to take on projects.
