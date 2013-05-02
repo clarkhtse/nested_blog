@@ -41,8 +41,7 @@ launching it? I would be more than glad to help you.
 
 ### Previous projects
 
-You can see some of the projects I worked on previously on the [projects
-page](/projects.html).
+[![ShopStream](http://f.cl.ly/items/2M12291x1N2v0w3V3B3G/ShopStream-1.jpg)](/projects/shopstream.html)
 
 ### The pay
 
