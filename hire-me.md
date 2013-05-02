@@ -16,8 +16,6 @@ I love turning ideas into working applications. Got a product idea
 that's stuck into your head? Want to have it prototyped?  Dream of
 launching it? I would be more than glad to help you.
 
-I work on hourly basis and charge **$100 an hour**.
-
 ### Testimonials
 
 > Gosha is an amazing developer, fast paced, self motivated, great tech
@@ -45,5 +43,9 @@ I work on hourly basis and charge **$100 an hour**.
 
 You can see some of the projects I worked on previously on the [projects
 page](/projects.html).
+
+### The pay
+
+I work on hourly basis and charge **$100 an hour**.
 
 [Get in touch](mailto:{{ site.author.email }}).
