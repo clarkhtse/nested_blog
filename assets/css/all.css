@@ -326,11 +326,16 @@ body {
   padding: 0; }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Bitter", Georgia, serif;
   color: black;
   font-weight: bold; }
   h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
     color: rgba(0, 0, 0, 0.8); }
+
+h1, h2 {
+  font-family: "Bitter", Georgia, serif; }
+
+h3, h4, h5, h6 {
+  font-family: "Open Sans", sans-serif; }
 
 h1 {
   font-size: 32px;
