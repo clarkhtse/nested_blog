@@ -366,5 +366,10 @@ article {
     transform: none;
     -webkit-transform: none;
     position: static;
+    margin: -70px 0 80px;
+
+    .compact & {
+      margin: 0;
+    }
   }
 }
