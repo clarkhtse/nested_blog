@@ -3,8 +3,6 @@ layout: page
 title: Hire me for your next project
 --- 
 
-Gosha is a freelance Ruby developer available to take on projects.
-
 ### Services
 
 I specialize in providing engineering services with primary focus on web
@@ -16,6 +14,8 @@ and creating amazing experiences.
 I love turning ideas into working applications. Got a product idea
 that's stuck into your head? Want to have it prototyped?  Dream of
 launching it? I would be more than glad to help you.
+
+I work on hourly basis and charge **$100 an hour**.
 
 ### Testimonials
 
@@ -42,7 +42,7 @@ launching it? I would be more than glad to help you.
 
 ### Previous projects
 
-You can see some of the projects I've made previously on the [projects
+You can see some of the projects I worked on previously on the [projects
 page](/projects.html).
 
 [Get in touch](mailto:{{ site.author.email }}).
