@@ -522,7 +522,7 @@ ol.articles {
 article {
   padding: 20px 0; }
   article header h2 {
-    margin-bottom: 0.7em; }
+    margin-bottom: 0.9em; }
     article header h2 a.permalink:hover {
       color: #0881b3;
       border: 0; }
@@ -531,8 +531,7 @@ article {
     font-size: 14px;
     line-height: 20px;
     padding: 0;
-    margin: 0;
-    margin-bottom: 1em; }
+    margin: -1em 0 1em; }
   article ul, article ol {
     margin: 0 0 1em 0.5em;
     padding: 0; }
