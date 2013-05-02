@@ -89,6 +89,14 @@ blockquote {
       color: $link-color;
     }
   }
+
+  small {
+    font-size: 85%;
+
+    &::before {
+      content: '— \00A0';
+    }
+  }
 }
 
 small {
@@ -370,6 +378,14 @@ article {
 
     .compact & {
       margin: 0;
+    }
+  }
+}
+
+.hire-me {
+  blockquote {
+    p {
+      font-size: 1.2em;
     }
   }
 }

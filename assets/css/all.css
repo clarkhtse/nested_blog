@@ -1,3 +1,4 @@
+@charset "UTF-8";
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,700,300italic,400italic,700italic|Bitter:700,700italic);
 /* normalize.css v2.0.1 | MIT License | git.io/normalize */
 /* ==========================================================================
@@ -382,6 +383,10 @@ blockquote {
     color: #444; }
     blockquote a:hover {
       color: #0881b3; }
+  blockquote small {
+    font-size: 85%; }
+    blockquote small::before {
+      content: '— \00A0'; }
 
 small {
   font-size: 0.8em;
@@ -573,6 +578,9 @@ article {
       margin: -70px 0 80px; }
       .compact .ribbon {
         margin: 0; } }
+
+.hire-me blockquote p {
+  font-size: 1.2em; }
 
 .hll {
   background-color: #ffffcc; }

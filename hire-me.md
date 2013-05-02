@@ -1,5 +1,6 @@
 ---
 layout: page
+page_class: hire-me
 title: Hire me for your next project
 --- 
 
@@ -23,7 +24,7 @@ I work on hourly basis and charge **$100 an hour**.
 > knowledge and always willing to learn. I worked with him in 2 projects
 > and he always delivered great results. I strongly recommend him.
 
-> *Diego Gomes: ShopStream*
+> <small>Diego Gomes: ShopStream</small>
 
 --
 
@@ -38,7 +39,7 @@ I work on hourly basis and charge **$100 an hour**.
 
 > I will definitely work with him again in the future.
 
-> *Eric Munier*
+> <small>Eric Munier</small>
 
 ### Previous projects
 
