@@ -10,16 +10,5 @@ markdown: redcarpet
 redcarpet:
   extensions: [tables]
 
-title: Gosha Arinich
-tagline: Words.
-author:
-  name: Gosha Arinich
-  email: me@goshakkk.name
-  github: goshakkk
-  twitter: goshakkk
-  500px: goshakkk
-  feedburner: GoshaArinich
-  available_for_hire: true
 
 gauges_tracking_id: 4fd5fa55613f5d40d700002a
-production_url: http://goshakkk.name
