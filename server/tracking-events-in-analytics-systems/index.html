@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Tracking events in analytics systems</title>
+
+    <meta name="author" content="">
+    <meta name="description" content="">
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/">
+    <link href="/assets/css/all.css" media="screen" rel="stylesheet" type="text/css">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  </head>
+  <body>
+    <header class="compact">
+      <div class="container">
+        <a class="logo" href="/">
+          <div class="label">
+            <h1></h1>
+            <h2></h2>
+          </div>
+        </a>
+        <nav>
+          <ul>
+            <li><a href="/projects.html">projects</a></li>
+            <li><a href="http://github.com/">github</a></li>
+            <li><a href="http://twitter.com/">twitter</a></li>
+            <li><a href="mailto:">email</a></li>
+            <li><a href="http://feeds.feedburner.com/">feed</a></li>
+          </ul>
+        </nav>
+      </div>
+      <section class="ribbon">
+        <a href="/hire-me.html">available for hire</a>
+      </section>
+    </header>
+    <section class="">
+      <article>
+  <header>
+    <h2><a href="/tracking-events-in-analytics-systems">Tracking events in analytics systems</a></h2>
+    <p class="date">23 Jan 2013</p>
+  </header>
+  <p>Lately, I have been working on ShopStream, an analytics-as-a-service for online stores. I would like to reflect on the choices I made and the things I learned during building it.</p>
+
+<p>The terms I use in the article:</p>
+
+<ul>
+<li>analytics systems — systems that allow to track and vizualize the data (sometimes third-party, sometimes not)</li>
+<li>metrics — some numbers computed for the tracked data, that give some sense of that set of data. &quot;Average purchase&quot; for a specific time period for a shop is a nice example of that</li>
+</ul>
+
+<p>From the standpoint of the users of analytic systems, there is only one thing to be done to enjoy their numbers, charts, and so on — that thing is to track events they are interested in. New page load, item added to the cart, check out.</p>
+
+<p>As I have explored, there are basically two options of tracking those events at programmatic level.</p>
+
+<h3>&quot;Why do we need the original payload&quot;</h3>
+
+<p>It is so simple to update metric values right after the event was sent to be tracked. As simple as <code>db.metrics.update({shop_id: 1, year: 2013, month: 1, day: 10, hour: 10}, {$inc: {pageviews: 1} })</code>. No need to store actual event after updating the metrics.</p>
+
+<p>As anything, this approach comes with its upsides and downsides. </p>
+
+<p>You benefit by:</p>
+
+<ul>
+<li>having smaller DB and index size. There is no raw event data to be stored and indexed</li>
+<li>having metric value as a field in your document, so simple</li>
+<li>having generally better performance</li>
+</ul>
+
+<p>But there are a plenty of things where you loose, namely:</p>
+
+<ul>
+<li>if you add a new kind of metric that you system calculates, it is calculated only for new events</li>
+<li>there is quite smaller number of ways you can analyze your data. You just have numbers over there, you can&#39;t do anything with already tracked data — because there is no actual data</li>
+</ul>
+
+<p>True, it works just nicely in some cases. One example of that are systems which track data that is actual for short periods of times — systems to track average server load, to record your logs and similar.</p>
+
+<p>But there are cases when you need something more sophisticated — when you want to keep track of everything that ever happened and be able to analyze all of that. There is a solution for that. </p>
+
+<h3>Always. Save. Raw. Event. Data</h3>
+
+<p>As the section title implies, it is all about tracking original event payloads and storing all of them.</p>
+
+<p>You benefit by:</p>
+
+<ul>
+<li>having access to all the event data</li>
+<li>being able to do so many things to dissect them</li>
+<li>having any of your new metric make use of all the data that was ever collected</li>
+</ul>
+
+<p>Storing all the events is not always a good idea in all cases. It is helpful if you, say, track shop&#39;s purchases (as a 3rd party) — you could analyze the order events to compute top sold products for any period you&#39;d like. You just have a bunch of events, you don&#39;t have to track each of them at different granularity levels (e.g. # of requests in this second/hour/day/month/year), like the first approach does. You could even apply some machine learning on those sets of data to predict profitable seasons and stuff like that.</p>
+
+<p>Yes, there are downsides:</p>
+
+<ul>
+<li>you have to store <strong>all</strong> the data. If you track zillions events an hour, that could result in hilarious size of your database &amp; indexes</li>
+<li>processing all of the data when you need to compute some number on set of those events could be particularly slow on huge datasets. There are technology &amp; techniques to make it faster, I&#39;ll get more into it in my next blog post</li>
+</ul>
+
+<p>There is no single &quot;right&quot; way after all. It&#39;s all about trade-offs — deciding what is important for <em>your</em> system and what can be left off in favor of something else.</p>
+
+<p>Speaking of ShopStream — we have decided to take the latter approach. We are constantly changing our views on what metrics we need and are planning on some really neat features that require events being present in their raw view.</p>
+
+<p>I&#39;m planning on writing a follow-up post on processing tracked events. Keep posted.</p>
+
+
+  
+</article>
+
+    </section>
+    <script type="text/javascript">
+  var _gauges = _gauges || [];
+  (function() {
+    var t   = document.createElement('script');
+    t.type  = 'text/javascript';
+    t.async = true;
+    t.id    = 'gauges-tracker';
+    t.setAttribute('data-site-id', '4fd5fa55613f5d40d700002a');
+    t.src = '//secure.gaug.es/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+</script>
+
+  </body>
+</html>

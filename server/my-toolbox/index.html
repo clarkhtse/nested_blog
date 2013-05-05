@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>My toolbox</title>
+
+    <meta name="author" content="">
+    <meta name="description" content="">
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/">
+    <link href="/assets/css/all.css" media="screen" rel="stylesheet" type="text/css">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  </head>
+  <body>
+    <header class="compact">
+      <div class="container">
+        <a class="logo" href="/">
+          <div class="label">
+            <h1></h1>
+            <h2></h2>
+          </div>
+        </a>
+        <nav>
+          <ul>
+            <li><a href="/projects.html">projects</a></li>
+            <li><a href="http://github.com/">github</a></li>
+            <li><a href="http://twitter.com/">twitter</a></li>
+            <li><a href="mailto:">email</a></li>
+            <li><a href="http://feeds.feedburner.com/">feed</a></li>
+          </ul>
+        </nav>
+      </div>
+      <section class="ribbon">
+        <a href="/hire-me.html">available for hire</a>
+      </section>
+    </header>
+    <section class="">
+      <article>
+  <header>
+    <h2><a href="/my-toolbox">My toolbox</a></h2>
+    <p class="date">06 Aug 2012</p>
+  </header>
+  <p>I haven&#39;t written here anything in a while. Whatever, I&#39;d like to describe my toolbox and setup.</p>
+
+<h3>Hardware</h3>
+
+<p><img src="http://f.cl.ly/items/1S3s330j0X001e0n2d14/Image%202012.08.06%204:46:01%20PM.png" alt="Macbook Air &amp; Thunderbolt Display"></p>
+
+<p>First of all, most of magic happens on my Macbook Air 13&quot;. When I&#39;m not on the go, or laying on the couch, the Macbook is hooked up to Thunderbolt Display.</p>
+
+<p>Macbook Air is really a beautiful, appealing thing. Not only it&#39;s a piece of hardware, but also the awesome experience. Small, thin, light, fast.</p>
+
+<h2>OS</h2>
+
+<p>My OS of choice is, not hard to guess, OS X. Compared to Windows, its main pro is, it&#39;s the real <strong>UNIX</strong>, meaning I have my lovely terminal there, and all UNIX tools. (I can&#39;t even imagine myself working without that.)</p>
+
+<p>A few pros of OS X over both Windows and different Linux distros:</p>
+
+<ul>
+<li><strong>UI/UX</strong>, the one I really like it for. Stylish, elegant, Made For Humans™</li>
+<li>could be a part of previous, but I&#39;d rather write it separately: <strong>font rendering</strong>. If you&#39;ve ever seen how texts are rendered on Macs, I doubt you&#39;ll be able to look at how they are rendered on Windows/Linux machines without your eyes bleeding</li>
+<li>nice <strong>application ecosystem</strong></li>
+</ul>
+
+<p><em>(Shortly: I really do care about simplicily, power, and aethetics at the same time.)</em></p>
+
+<h3>Dev environment</h3>
+
+<p>My entire development environment can be bootstrapped on any Mac with a single command[^1]:</p>
+<div class="highlight"><pre><code class="text">bash -c &quot;$(curl -L https://raw.github.com/goshakkk/babushka-deps/master/install.sh)&quot;
+</code></pre></div>
+<p><a href="http://mxcl.github.com/homebrew/">Brew</a> for packages stuff.</p>
+
+<p>I use Terminal.app and zsh as my shell, with <a href="https://github.com/robbyrussell/oh-my-zsh/">oh my zsh</a>. Vim is my editor of choice, with <a href="https://github.com/carlhuda/janus">janus</a>. (Here are my <a href="https://github.com/goshakkk/dotfiles">dotfiles</a>.)</p>
+
+<p><img src="http://f.cl.ly/items/3I1N3Q1q0x080x0P463W/Screen%20Shot%202012-08-06%20at%205.48.40%20PM.png" alt="VIM"></p>
+
+<p>My favorite coding/terminal color scheme is <a href="http://ethanschoonover.com/solarized">Solarized</a>. Choice of Light/Dark one depends on whenever I&#39;m working on a perosnal or client project.</p>
+
+<p>Rack/Rails, node.js apps are run through <a href="http://pow.cx">Pow</a>.</p>
+
+<p><img src="http://f.cl.ly/items/0B3T0F022e0e2T2R1k2x/Screen%20Shot%202012-08-06%20at%205.26.30%20PM.png" alt="manservant"></p>
+
+<p>I also run a <a href="https://github.com/jimeh/manservant">manservant</a> instance using Pow on <code>man.dev</code>. With it, I&#39;m able to look up manpages right from Safari.</p>
+
+<p>Obviously, my personal &amp; client apps are on Github. Github is especially useful for client app development — each repo has got a wiki for some project-related documents, Issues are awesome for both tracking bugs, offering new features, having discussions, and managing milestones.</p>
+
+<h3>Technologies</h3>
+
+<p>For managing ruby versions &amp; environments, I prefer <a href="https://github.com/sstephenson/rbenv/">rbenv</a>.</p>
+
+<p>Most of times, I&#39;m using the following stack:</p>
+
+<ul>
+<li>Ruby 1.9.3</li>
+<li>Rails 3</li>
+<li><a href="http://www.mongodb.org">MongoDB</a> for DB, and <a href="http://mongoid.org/en/mongoid/index.html">Mongoid</a> as AR-like ORM</li>
+<li><a href="http://redis.io">Redis</a> with <a href="https://github.com/redis/redis-rb">redis-rb</a></li>
+<li><a href="https://github.com/plataformatec/devise">Devise</a> for authentification</li>
+<li><a href="https://github.com/ryanb/cancan/">CanCan</a> for ability management</li>
+<li><a href="http://haml.info">HAML</a>/<a href="http://slim-lang.com">Slim</a> for templating</li>
+<li><a href="http://sass-lang.com">SCSS</a>/<a href="http://lesscss.org">Less</a> for stylesheets</li>
+<li><a href="http://coffeescript.org">CoffeeScript</a> for JS</li>
+<li><a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a> with some customization</li>
+<li>Old-fashioned, mostly static client side with some jQuery for animations/AJAX</li>
+<li><a href="https://github.com/rspec/rspec/">RSpec</a>, <a href="https://github.com/thoughtbot/factory_girl/">FactoryGirl</a> for testing (and <a href="https://github.com/mattsears/nyan-cat-formatter">nyan cat rspec formatter</a>)</li>
+<li><a href="http://puma.io">Puma</a>/<a href="http://code.macournoyer.com/thin/">Thin</a> as web server</li>
+</ul>
+
+<p>Whatsoever, I&#39;m currently taking at <a href="http://backbonejs.org">Backbone.js</a>, <a href="http://underscorejs.org">Underscore.js</a>, <a href="https://github.com/chaplinjs/chaplin">Chaplin</a>, <a href="http://brunch.io">Brunch</a>, <a href="http://coffeescript.org">CoffeeScript</a>, <a href="http://lesscss.org">Less</a>, <a href="http://handlebarsjs.com">Handlebars</a> for client side, which is a <strong>simple, separate aplication</strong>, depending only on backend app API.</p>
+
+<p>Nevertheless, I don&#39;t like being locked into one language, I want to be a polyglot. I&#39;m playing with a whole lot of different technologies in my spare time — <a href="http://nodejs.org">Node.js</a>, <a href="http://www.scala-lang.org">Scala</a>, <a href="http://www.erlang.org">Erlang</a>/<a href="http://elixir-lang.org">Elixir</a>, <a href="http://clojure.org">Clojure</a>. (And whenever some of those make specific taks better than Ruby, I&#39;m using it over Ruby. So in my recent client app I&#39;ve got a zoo of a few apps — backend Rails app, utility Node.js application, communicating via REST API/<a href="http://pusher.com">Pusher</a> with frontend Backbone app.)</p>
+
+<p>When building apps, I follow the <a href="http://www.12factor.net">Twelve-Factor App methodology</a>.</p>
+
+<h3>Deployment</h3>
+
+<p>I don&#39;t deploy my apps to separate own server, nor I really want to.</p>
+
+<p><a href="http://heroku.com">Heroku</a> allows rapid, dead-simple deployment. And so, it&#39;s my the only deployment option (for now at least, I do understand that some very specific kinds of apps might require separate server). I like its simplicity (in deploying, scaling, managing env vars), I like lots of its hidden power (<a href="https://devcenter.heroku.com/articles/buildpacks">buildpacks</a>, for example). Deployed apps use <a href="https://addons.heroku.com/mongolab">MongoLab</a> for MongoDB in the cloud, <a href="https://addons.heroku.com/redistogo">Redis to go</a> for Redis.</p>
+
+<p>I track exceptions with <a href="https://addons.heroku.com/airbrake">Airbrake</a>, store and browse heroku logs with <a href="https://addons.heroku.com/papertrail">Papertrail</a>.</p>
+
+<h3>Stuff</h3>
+
+<p>Safari for browsing, <a href="http://tapbots.com/tweetbot_mac/">Tweetbot</a> as Twitter client app, still Sparrow for email, iTunes for music, <a href="http://apple.com/aperture/">Aperture</a> for photos, <a href="https://agilebits.com/onepassword">1Password</a> for password management, <a href="http://reederapp.com/">Reeder</a>/<a href="http://getprismatic.com">Prismatic</a> for news, <a href="http://www.readability.com/">Readability</a> for read-it-later thing, <a href="http://getcloudapp.com">Cloud</a> app for screenshot sharing, <a href="http://giantcomet.com/flint/">Flint</a> as <a href="http://campfirenow.com">Campfire</a> client, <a href="http://www.darkheartfelt.com/grandview">Grandview</a> for focused writing, <a href="http://mizage.com/divvy/">Divvy</a> for window management, <a href="http://www.macbartender.com">Bartender</a>, <a href="http://fuelcollective.com/eon">Eon</a> as client for <a href="http://letsfreckle.com">Freckle</a>, <a href="https://ohlife.com">OhLife</a> for some sort of journal.</p>
+
+<p>I also store my backups and photo library on 2Tb <a href="http://www.apple.com/timecapsule/">Time Capsule</a>.</p>
+
+<p>[^1]: it uses <a href="http://babushka.me">babushka</a> to bootstrap the
+environment. Here are my
+<a href="https://github.com/goshakkk/babushka-deps">babushka-deps</a>.</p>
+
+
+  
+</article>
+
+    </section>
+    <script type="text/javascript">
+  var _gauges = _gauges || [];
+  (function() {
+    var t   = document.createElement('script');
+    t.type  = 'text/javascript';
+    t.async = true;
+    t.id    = 'gauges-tracker';
+    t.setAttribute('data-site-id', '4fd5fa55613f5d40d700002a');
+    t.src = '//secure.gaug.es/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+</script>
+
+  </body>
+</html>

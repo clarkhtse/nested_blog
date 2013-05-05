@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Objective-C: Rubyist's insight</title>
+
+    <meta name="author" content="">
+    <meta name="description" content="">
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/">
+    <link href="/assets/css/all.css" media="screen" rel="stylesheet" type="text/css">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  </head>
+  <body>
+    <header class="compact">
+      <div class="container">
+        <a class="logo" href="/">
+          <div class="label">
+            <h1></h1>
+            <h2></h2>
+          </div>
+        </a>
+        <nav>
+          <ul>
+            <li><a href="/projects.html">projects</a></li>
+            <li><a href="http://github.com/">github</a></li>
+            <li><a href="http://twitter.com/">twitter</a></li>
+            <li><a href="mailto:">email</a></li>
+            <li><a href="http://feeds.feedburner.com/">feed</a></li>
+          </ul>
+        </nav>
+      </div>
+      <section class="ribbon">
+        <a href="/hire-me.html">available for hire</a>
+      </section>
+    </header>
+    <section class="">
+      <article>
+  <header>
+    <h2><a href="/objective-c-rubyists-insight">Objective-C: Rubyist's insight</a></h2>
+    <p class="date">19 Aug 2011</p>
+  </header>
+  <h2>Intro</h2>
+
+<p><img src="http://habrastorage.org/storage1/9e3f6a48/f3ee30bb/18d4ea06/4208aa40.png" alt=""></p>
+
+<p>Before I started learning Objective-C, I did some PHP, then Python and
+Ruby. I like Ruby most of all. I like it for its simplicity, pithiness,
+and at the same time, for its power. About a week later (this post was
+originally written in Russian on 26th Jul --
+<a href="http://habrahabr.ru/blogs/macosxdev/124974/">link</a>) I got hackintosh on
+my PC up and running (now I own a MacBook Early 2008 Black). It was OS X
+Lion GM. I knew that the applications for Macs and iPhones are written
+in Objective-C, I even tried to learn Objective-C, but without a Mac
+that kind of learning was unpleasant. I installed Xcode 4.2, I have
+written several simple console apps. And each time I followed some
+tutorial, or just tried to do stuff myself, I kept noticing similarities
+between Ruby and Objective-C (and it&#39;s very logical -- both languages
+are influenced by <a href="http://en.wikipedia.org/wiki/Smalltalk">Smalltalk</a>),
+although they serve different purpose.</p>
+
+<p><img src="http://habrastorage.org/storage1/b9449c86/329c5f48/15953b7c/328d6257.png" alt=""></p>
+
+<p>So I&#39;ll describe a few things that will help Rubyists to understand
+Objective-C. These things are mostly theoretical, without the snippets
+of code. I apologize if some thing are not explained The C Way, I came
+from The World of Ruby. And sorry for my not good enough English.</p>
+
+<h2>1. Dynamicity</h2>
+
+<p>We all know that Ruby is a dynamic programming language. Okay but what&#39;s
+with Objective-C? Isn&#39;t it just a superset of C? Not quite. Objective-C
+makes many decisions (e.g. sending a message, etc) at runtime and not at compile time.</p>
+
+<h2>2. Object model</h2>
+
+<p>Everything is an object in Ruby. This isn&#39;t always true for Objective-C.
+As Objective-C is superset of C, basic data types (like <code>char</code>, <code>float</code>,
+<code>double</code>, <code>int</code>, <code>struct</code>) aren&#39;t objects. However Foundation.framework
+provides the functional wrappers around them as well as such ordinary
+things for Rubyists like Strings, Mutable Arrays, Hashes, etc.</p>
+
+<h2>3. Sending messages</h2>
+
+<p>In Ruby, when we call an object method we actually send a message to the
+object:</p>
+<div class="highlight"><pre><code class="ruby"><span class="c1"># what you do</span>
+<span class="n">object</span><span class="o">.</span><span class="n">method</span> <span class="n">args</span>
+<span class="c1"># what ruby actually does</span>
+<span class="n">object</span><span class="o">.</span><span class="n">send</span> <span class="ss">:method</span><span class="p">,</span> <span class="n">args</span>
+</code></pre></div>
+<p>That is, the method call is converted to passing a message. The same
+thing happens with Objective-C:</p>
+<div class="highlight"><pre><code class="objective-c"><span class="cp"># what you do</span>
+<span class="p">[</span><span class="n">object</span> <span class="n">method</span><span class="p">];</span>
+<span class="cp"># what actually happens</span>
+<span class="n">objc_msgSend</span><span class="p">(</span><span class="n">object</span><span class="p">,</span> <span class="k">@selector</span><span class="p">(</span><span class="n">method</span><span class="p">));</span>
+</code></pre></div>
+<p>This is precisely passing of a message and not a method call, because if
+we call a non-existent method we don&#39;t get any errors at compile time,
+only at runtime (that proves that Objective-C is dynamic too). At
+compile time <code>[object method]</code> is converted to C-call of
+<code>objc_sendMsg(id object, SEL selector)</code> function.</p>
+
+<p>If you use <a href="http://clang.llvm.org/">clang3</a>, it can make it throw errors
+when compiling.</p>
+
+<p><em>BTW, in the terminology of C++, methods in both Ruby and Objective-C are virtual.</em></p>
+
+<h2>4. Non-strict typing</h2>
+
+<p>Each developer in Ruby knows that they don&#39;t have to care about types.
+But not everyone knows that with Objective-C they can forget about types
+as well. If the type of the object is unknown to us yet, we can just
+specify the type of object as <code>id</code>, that means that variable can hold
+value of any type. <code>id</code> is kinda like a pointer to any object.</p>
+
+<p>Okay it&#39;s all good. But what with C-types? No, it doesn&#39;t work with
+C-typesi. However we can use Foundation&#39;s wrappers over C types like
+<code>NSNumber</code>, <code>NSString</code>, <code>NSArray</code>, and so forth.</p>
+
+<h2>5. Class declaration, instances of objects, and properties</h2>
+
+<p>In Ruby we just define a class, in Objective-C we have to write both
+interface and implementation for the class. In Ruby we can define any i-var from any method, in Objective-C we have to declare all i-vars we are going to use in an interface file.
+An objects are created easily in both langs though. In Ruby we just send
+<code>new</code> message to the class:</p>
+<div class="highlight"><pre><code class="ruby"><span class="n">myObject</span> <span class="o">=</span> <span class="no">MyClass</span><span class="o">.</span><span class="n">new</span>
+</code></pre></div>
+<p>In Objective-C we need to allocate memory for the object (<code>alloc</code>) and
+then to initialize it (with <code>init</code> or <code>initWith...</code> method):</p>
+<div class="highlight"><pre><code class="objective-c"><span class="n">MyClass</span> <span class="o">*</span> <span class="n">myObject</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MyClass</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+</code></pre></div>
+<p>If we want to access the i-vars from the outside, we define getter and
+setter methods. In Ruby we just write <code>attr_accessor :var</code> inside class
+definition, in Objective-C we write <code>type * variableName</code> inside i-vars
+definition block, <code>@property(retain) type * variableName</code> after methods
+definition, and <code>@synthesize variableName</code> inside class implementation
+file.</p>
+
+<p><em>As Objective-C is a superset of C, we ought to care about memory. LLVM compiler however provides us with one interesting feature -- Automatic Reference Counting, which takes care about freeing memory. Xcode 4.2 and newer uses LLVM compiler by default, so we can not care about memory. But for deeper Objective-C understanding I highly recommend you to spend some time understanding memory management.</em></p>
+
+<h2>6. Protocols and mixins</h2>
+
+<p>In Ruby we can define modules and then mix &#39;em into the classes, in a
+such way something like multiple inheritance is realized. In Objective-C
+we haven&#39;t modules. But we have protocols.</p>
+
+<blockquote>
+<p>An informal protocol is a list of methods that a class can opt to implement. It is specified in the documentation, since it has no presence in the language. Informal protocols often include optional methods, which, if implemented, can change the behavior of a class. For example, a text field class might have a delegate that implements an informal protocol with an optional method for performing auto-completion of user-typed text. The text field discovers whether the delegate implements that method (via reflection) and, if so, calls the delegate&#39;s method to support the auto-complete feature.</p>
+</blockquote>
+
+<p>And for example we can implement a method that can take any object that realizes <code>Serializable</code> protocol and be sure that the object can respond to <code>serialize</code> message.</p>
+
+<h2>7. Categories and class extension</h2>
+
+<p>If we want to extend a Ruby class, we can simply write:</p>
+<div class="highlight"><pre><code class="ruby"><span class="k">class</span> <span class="nc">String</span>
+  <span class="k">def</span> <span class="nf">hello_world</span>
+    <span class="s2">&quot;Hey&quot;</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>That way we added <code>hello_world</code> method to <code>String</code> class (but we can do
+so in many ways). In Objective-C we can do something similar using
+categories:</p>
+<div class="highlight"><pre><code class="objective-c"><span class="k">@interface</span> <span class="nc">NSString</span> <span class="nl">(HelloWorld)</span>
+<span class="k">+</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nf">helloWorld</span><span class="p">;</span>
+<span class="k">@end</span>
+
+<span class="k">@implementation</span> <span class="nc">NSString</span> <span class="nl">(HelloWorld)</span>
+<span class="k">+</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nf">helloWorld</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="s">@&quot;Hey&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">@end</span>
+</code></pre></div>
+<p>Usually categories are saved in files named like <code>ClassToBeExtended+CategoryName</code> -- e.g. <code>NSString+HelloWorld.h</code> and <code>NSString+HelloWorld.m</code>, and then are imported.</p>
+
+<p>Here are several things that simplified my understanding of
+Objective-C. Hope this article is helpful for you. Good luck!</p>
+
+
+  
+</article>
+
+    </section>
+    <script type="text/javascript">
+  var _gauges = _gauges || [];
+  (function() {
+    var t   = document.createElement('script');
+    t.type  = 'text/javascript';
+    t.async = true;
+    t.id    = 'gauges-tracker';
+    t.setAttribute('data-site-id', '4fd5fa55613f5d40d700002a');
+    t.src = '//secure.gaug.es/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+</script>
+
+  </body>
+</html>

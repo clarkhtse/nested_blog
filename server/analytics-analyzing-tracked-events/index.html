@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Analytics: Analyzing tracked events</title>
+
+    <meta name="author" content="">
+    <meta name="description" content="">
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/">
+    <link href="/assets/css/all.css" media="screen" rel="stylesheet" type="text/css">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  </head>
+  <body>
+    <header class="compact">
+      <div class="container">
+        <a class="logo" href="/">
+          <div class="label">
+            <h1></h1>
+            <h2></h2>
+          </div>
+        </a>
+        <nav>
+          <ul>
+            <li><a href="/projects.html">projects</a></li>
+            <li><a href="http://github.com/">github</a></li>
+            <li><a href="http://twitter.com/">twitter</a></li>
+            <li><a href="mailto:">email</a></li>
+            <li><a href="http://feeds.feedburner.com/">feed</a></li>
+          </ul>
+        </nav>
+      </div>
+      <section class="ribbon">
+        <a href="/hire-me.html">available for hire</a>
+      </section>
+    </header>
+    <section class="">
+      <article>
+  <header>
+    <h2><a href="/analytics-analyzing-tracked-events">Analytics: Analyzing tracked events</a></h2>
+    <p class="date">07 Feb 2013</p>
+  </header>
+  <p>In previous article, I&#39;ve shown two essential ways the events get tracked. </p>
+
+<p>Now, I would like to focus on the latter event of tracking — storing all the event data, and analyzing it ad-hoc afterwards. </p>
+
+<p>It is important to analyze data in the fastest fashion, while preserving the power. That&#39;s the main concern of this post. </p>
+
+<p>We&#39;d explore more about that using the shop tracking system as an example. It would track only one kind of event — orders. To keep the samples simple, we&#39;ll only calculate these metrics:</p>
+
+<ul>
+<li>average purchase total</li>
+<li>top products</li>
+</ul>
+
+<p>The structure of the event document would be as follows:</p>
+
+<ul>
+<li>total — float order total</li>
+<li>line items — array with elements like:
+
+<ul>
+<li>sku — string product sku</li>
+<li>price — float item price</li>
+</ul></li>
+</ul>
+
+<p>For the sake of this example, we will perform different analysis methods against a set of 1,000,000 of such order events, with each having 5 line items on average.</p>
+
+<p>We&#39;ll use MongoDB as schema-less documents are the fit for storing events and also because of its powerful analytics functionalities. Worth noticing that those features will mainly be described in light of their application to described tasks.</p>
+
+<p><a href="http://github.com/goshakkk/simple-analytics-demo">Sample sources</a></p>
+
+<h3>The naive way</h3>
+
+<p>The most obvious thing to do is to query all the events and perform our analysis in Ruby.</p>
+<div class="highlight"><pre><code class="ruby"><span class="k">def</span> <span class="nf">average_purchase</span>
+  <span class="n">all</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:total</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span> <span class="o">/</span> <span class="n">all</span><span class="o">.</span><span class="n">count</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">top_products</span>
+  <span class="n">all</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:line_items</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:sku</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="o">[</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">count</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">sort_by</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:last</span><span class="p">)</span><span class="o">.</span><span class="n">reverse</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>While it seems pretty simple, it does in no way seem performant.</p>
+
+<table><thead>
+<tr>
+<th>naive</th>
+<th>time</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>avg purchase</td>
+<td>119,775ms</td>
+</tr>
+<tr>
+<td>top products</td>
+<td><em>canceled after 2+ hours of waiting</em></td>
+</tr>
+<tr>
+<td><strong>total</strong></td>
+<td><strong>canceled after 2+ hours of waiting</strong></td>
+</tr>
+</tbody></table>
+
+<p>And not only it is being slow, it is also being highly RAM-consuming. The overhead of transmitting 1M documents from Mongo to Ruby process and then storing that in RAM is hurting.</p>
+
+<h3>Evaluating JS code on MongoDB server</h3>
+
+<p>What was the worst point of previous case? Right, transmitting the data and storing it in memory.</p>
+
+<p>If there only was a way to evaluate arbitrary code on MongoDB side… Well, there is. It&#39;s called <a href="http://docs.mongodb.org/manual/reference/method/db.eval/#db.eval">db.eval()</a>.</p>
+
+<p>Using it, we can execute any JavaScript as if we were running it inside <code>mongo</code>. It effectively reduces the overhead of transmitting and introduces overhead of running a JavaScript VM.</p>
+<div class="highlight"><pre><code class="ruby"><span class="k">def</span> <span class="nf">average_purchase</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;$eval&quot;</span> <span class="o">=&gt;</span> <span class="o">&lt;&lt;-</span><span class="no">EOJS</span><span class="p">)</span>
+<span class="sh">    var orders = db.order_events.find(),</span>
+<span class="sh">        order_count = orders.count(),</span>
+<span class="sh">        total_sum = 0;</span>
+
+<span class="sh">    orders.forEach(function(order) {</span>
+<span class="sh">      total_sum += order.total;</span>
+<span class="sh">    });</span>
+
+<span class="sh">    return total_sum / order_count;</span>
+<span class="no">  EOJS</span>
+
+  <span class="n">result</span><span class="o">[</span><span class="s1">&#39;retval&#39;</span><span class="o">]</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">top_products</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;$eval&quot;</span> <span class="o">=&gt;</span> <span class="o">&lt;&lt;-</span><span class="no">EOJS</span><span class="p">)</span>
+<span class="sh">    var orders = db.order_events.find(),</span>
+<span class="sh">        products = {};</span>
+
+<span class="sh">    orders.forEach(function(order) {</span>
+<span class="sh">      order.line_items.forEach(function(item) {</span>
+<span class="sh">        var sku = item.sku;</span>
+<span class="sh">        if (!products[sku]) products[sku] = 0;</span>
+<span class="sh">        products[sku] += 1;</span>
+<span class="sh">      });</span>
+<span class="sh">    });</span>
+
+<span class="sh">    return products;</span>
+<span class="no">  EOJS</span>
+
+  <span class="n">result</span><span class="o">[</span><span class="s1">&#39;retval&#39;</span><span class="o">].</span><span class="n">to_a</span><span class="o">.</span><span class="n">sort_by</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:last</span><span class="p">)</span><span class="o">.</span><span class="n">reverse</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>It is more of the code, but the results are better:</p>
+
+<table><thead>
+<tr>
+<th>db.eval()</th>
+<th>time</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>avg purchase</td>
+<td>8,228ms</td>
+</tr>
+<tr>
+<td>top products</td>
+<td>42,399ms</td>
+</tr>
+<tr>
+<td><strong>total</strong></td>
+<td><strong>50,627ms</strong></td>
+</tr>
+</tbody></table>
+
+<p>The disadvantage of using it is the write lock being placed while it&#39;s running and overhead of executing it in JavaScript VM.</p>
+
+<h3>Map/reduce</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/MapReduce">Map/reduce</a> is a programming model for processing large data sets. One of highlights is distributing processing of computations across the cluster. Not only that, it also has the benefits of <code>db.eval()</code>. You can learn more about how MongoDB implements it <a href="http://docs.mongodb.org/manual/applications/map-reduce/">here</a>.</p>
+
+<p>Worth noticing that map/reduce is not always a suitable substitution for <code>db.eval()</code>. The tasks we are trying to accomplish, on another hand, are the perfect match for using it.</p>
+<div class="highlight"><pre><code class="ruby"><span class="k">def</span> <span class="nf">average_purchase</span>
+  <span class="n">map</span> <span class="o">=</span> <span class="s2">&quot;function() { emit(&#39;avg&#39;, this); }&quot;</span>
+
+  <span class="n">reduce</span> <span class="o">=</span> <span class="sx">%Q{</span>
+<span class="sx">    function(key, values) {</span>
+<span class="sx">      var result = { sum: 0, count: 0 };</span>
+<span class="sx">      values.forEach(function(value) {</span>
+<span class="sx">        result.sum += value.total;</span>
+<span class="sx">        result.count += 1;</span>
+<span class="sx">      });</span>
+<span class="sx">      return result;</span>
+<span class="sx">    }</span>
+<span class="sx">  }</span>
+
+  <span class="n">finalize</span> <span class="o">=</span> <span class="sx">%Q{</span>
+<span class="sx">    function(key, value) {</span>
+<span class="sx">      value.avg = value.sum / value.count;</span>
+<span class="sx">      return value;</span>
+<span class="sx">    }</span>
+<span class="sx">  }</span>
+
+  <span class="n">map_reduce</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="n">reduce</span><span class="p">)</span><span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="ss">inline</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="n">finalize</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span><span class="o">.</span><span class="n">first</span><span class="o">[</span><span class="s1">&#39;value&#39;</span><span class="o">][</span><span class="s1">&#39;avg&#39;</span><span class="o">]</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">top_products</span>
+  <span class="n">map</span> <span class="o">=</span> <span class="sx">%Q{</span>
+<span class="sx">    function() {</span>
+<span class="sx">      this.line_items.forEach(function(item) {</span>
+<span class="sx">        emit(item.sku, item);</span>
+<span class="sx">      });</span>
+<span class="sx">    }</span>
+<span class="sx">  }</span>
+
+  <span class="n">reduce</span> <span class="o">=</span> <span class="sx">%Q{</span>
+<span class="sx">    function(key, values) {</span>
+<span class="sx">      var result = { purchases: 0 };</span>
+<span class="sx">      values.forEach(function(value) {</span>
+<span class="sx">        result.purchases += 1;</span>
+<span class="sx">      });</span>
+<span class="sx">      return result;</span>
+<span class="sx">    }</span>
+<span class="sx">  }</span>
+
+  <span class="n">items</span> <span class="o">=</span> <span class="n">map_reduce</span><span class="p">(</span><span class="n">map</span><span class="p">,</span> <span class="n">reduce</span><span class="p">)</span><span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="ss">inline</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span>
+  <span class="n">items</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">doc</span><span class="o">|</span> <span class="o">[</span><span class="n">doc</span><span class="o">[</span><span class="s1">&#39;_id&#39;</span><span class="o">]</span><span class="p">,</span> <span class="n">doc</span><span class="o">[</span><span class="s1">&#39;value&#39;</span><span class="o">][</span><span class="s1">&#39;purchases&#39;</span><span class="o">]]</span> <span class="p">}</span><span class="o">.</span><span class="n">sort_by</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:last</span><span class="p">)</span><span class="o">.</span><span class="n">reverse</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>Speed was generally worse compared to <code>db.eval()</code>. It is because  map/reduce splits tasks in two phases. If map/reduce is run on a shard cluster, tasks would be dispatched to each shard, thus making it faster. (Map/reduce wasn&#39;t meant to be damn fast anyway.)</p>
+
+<table><thead>
+<tr>
+<th>map reduce</th>
+<th>time</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>avg purchase</td>
+<td>20,498ms</td>
+</tr>
+<tr>
+<td>top products</td>
+<td>112,035ms</td>
+</tr>
+<tr>
+<td><strong>total</strong></td>
+<td><strong>132,534ms</strong></td>
+</tr>
+</tbody></table>
+
+<p>It also suffers from the same thing as <code>db.eval()</code> does — map/reducing places the write lock while it runs.</p>
+
+<h3>Aggregation framework</h3>
+
+<p>While map/reduce is truly awesome, the amount of code to aggregate simple things is often overwhelming.</p>
+
+<p>Assuming you&#39;re familiar with UNIX shell you would also wonder why can&#39;t you easily chain different operations in map/reduce? What if you wanted to do something like:</p>
+<div class="highlight"><pre><code class="text">match_criteria | sort | limit | group
+</code></pre></div>
+<p>Doing that with map/reduce would be a pain in ass.</p>
+
+<p>Ok, that sucks, but what are the alternatives? Well, MongoDB 2.1 and higher ships with something called <a href="http://docs.mongodb.org/manual/applications/aggregation/">&quot;aggregation framework&quot;</a>. Essentially, it is chainable map/reduce with common use cases implemented and optimized upfront. It is not a tutorial on it, so refer to the docs when you need. I&#39;d just go by showing how neat it is.</p>
+<div class="highlight"><pre><code class="ruby"><span class="k">def</span> <span class="nf">average_purchase</span>
+  <span class="n">collection</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="o">[</span>
+    <span class="p">{</span><span class="s2">&quot;$group&quot;</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;_id&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;avg&quot;</span><span class="p">,</span> <span class="s2">&quot;avg&quot;</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;$avg&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;$total&quot;</span><span class="p">}}}</span>
+  <span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="o">[</span><span class="s1">&#39;avg&#39;</span><span class="o">]</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">top_products</span>
+  <span class="n">collection</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="o">[</span>
+    <span class="p">{</span><span class="s2">&quot;$unwind&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;$line_items&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;$project&quot;</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;item&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;$line_items&quot;</span><span class="p">}},</span>
+    <span class="p">{</span><span class="s2">&quot;$group&quot;</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;_id&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;$item.sku&quot;</span><span class="p">,</span> <span class="s2">&quot;purchases&quot;</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;$sum&quot;</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">}}},</span>
+    <span class="p">{</span><span class="s2">&quot;$sort&quot;</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="s2">&quot;purchases&quot;</span> <span class="o">=&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">}}</span>
+  <span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">doc</span><span class="o">|</span> <span class="o">[</span><span class="n">doc</span><span class="o">[</span><span class="s1">&#39;_id&#39;</span><span class="o">]</span><span class="p">,</span> <span class="n">doc</span><span class="o">[</span><span class="s1">&#39;purchases&#39;</span><span class="o">]]</span> <span class="p">}</span>
+<span class="k">end</span>
+</code></pre></div>
+<p>Running it, we can notice great speed improvement compared to any of previously discussed ways:</p>
+
+<table><thead>
+<tr>
+<th>aggregation</th>
+<th>time</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>avg purchase</td>
+<td>2,511ms</td>
+</tr>
+<tr>
+<td>top products</td>
+<td>29,146ms</td>
+</tr>
+<tr>
+<td><strong>total</strong></td>
+<td><strong>31,658ms</strong></td>
+</tr>
+</tbody></table>
+
+<h3>Possible optimization techniques</h3>
+
+<p>Whatever method you end up using, it is wise to apply some optimization to metric calculation.</p>
+
+<p>Computing your metrics on every access to them would be super-dumb. Instead, once calculated, their value should be cached and always returned unless the metric dependencies change.</p>
+
+<p>In our examples, caches should be invalidated only when a new order is tracked.</p>
+
+<h3>Comparison</h3>
+
+<table><thead>
+<tr>
+<th></th>
+<th>naive</th>
+<th>db.eval()</th>
+<th>map/reduce</th>
+<th>aggregation</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>avg purchase</td>
+<td>119,775ms</td>
+<td>8,228ms</td>
+<td>20,498ms</td>
+<td>2,511ms</td>
+</tr>
+<tr>
+<td>top products</td>
+<td><em>canceled after 2+ hours of waiting</em></td>
+<td>42,399ms</td>
+<td>112,035ms</td>
+<td>29,146ms</td>
+</tr>
+<tr>
+<td>total</td>
+<td><em>canceled after 2+ hours of waiting</em></td>
+<td>50,627ms</td>
+<td>132,543ms</td>
+<td>31,658ms</td>
+</tr>
+<tr>
+<td>speed</td>
+<td>exceptionally low</td>
+<td>high</td>
+<td>medium</td>
+<td>super high</td>
+</tr>
+<tr>
+<td>memory usage</td>
+<td>high</td>
+<td>low</td>
+<td>low</td>
+<td>low</td>
+</tr>
+<tr>
+<td>data transfer overhead</td>
+<td>yes</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td>JS VM overhead</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>write lock</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>easily distributed</td>
+<td>—</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>optimized</td>
+<td>—</td>
+<td>—</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>output limit</td>
+<td>—</td>
+<td>—</td>
+<td>16Mb</td>
+<td>16Mb</td>
+</tr>
+<tr>
+<td>chainable</td>
+<td>—</td>
+<td>—</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+</tbody></table>
+
+<h3>Conclusion</h3>
+
+<p>Using MongoDB aggregation framework proves to be the fastest option you have. For sure, it is powerful enough to perform simple as well as more advanced analysis of data. It scales well and is simple to write.</p>
+
+<p>If something more sophisticated needed than it&#39;s possible to do with aggregation framework, you may use map/reduce, trading off the performance and loosing easy chainability. Scalability still remains the point.</p>
+
+<p>If your task is really simple but is impossible to do with aggregation framework or is very slow under map/reduce, it might be desirable to give <code>db.eval()</code> a shot. Cons? Doesn&#39;t scale.</p>
+
+<p>Querying all the documents and performing the analysis right in your programming language is the last resort. It&#39;s a loose by all means and generally it should be used only when neither of other options leads to desired result.</p>
+
+<p><a href="http://github.com/goshakkk/simple-analytics-demo">Sample sources</a></p>
+
+<p><em>I am not the expert at analytics, just the curious one. If I got something in a wrong way and/or advice the bad thing, feel free to let me know about that.</em></p>
+
+
+  
+    <p><i><a href="http://news.ycombinator.com/item?id=5182625">Discuss this post on HN</a>.</i></p>
+  
+</article>
+
+    </section>
+    <script type="text/javascript">
+  var _gauges = _gauges || [];
+  (function() {
+    var t   = document.createElement('script');
+    t.type  = 'text/javascript';
+    t.async = true;
+    t.id    = 'gauges-tracker';
+    t.setAttribute('data-site-id', '4fd5fa55613f5d40d700002a');
+    t.src = '//secure.gaug.es/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+</script>
+
+  </body>
+</html>

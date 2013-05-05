@@ -1,0 +1,1144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+ <title></title>
+ <link href="/atom.xml" rel="self"/>
+ <link href=""/>
+ <updated>2013-05-05T21:44:26+08:00</updated>
+ <id></id>
+ <author>
+   <name></name>
+   <email></email>
+ </author>
+
+ 
+ <entry>
+   <title>Hello world</title>
+   <link href="/hello"/>
+   <updated>2013-05-07T00:00:00+08:00</updated>
+   <id>/hello</id>
+   <content type="html">&lt;p&gt;In previous article, I&amp;#39;ve shown two essential ways the events get tracked. &lt;/p&gt;
+
+&lt;p&gt;Now, I would like to focus on the latter event of tracking — storing all the event data, and analyzing it ad-hoc afterwards. &lt;/p&gt;
+
+&lt;p&gt;It is important to analyze data in the fastest fashion, while preserving the power. That&amp;#39;s the main concern of this post. &lt;/p&gt;
+
+&lt;p&gt;We&amp;#39;d explore more about that using the shop tracking system as an example. It would track only one kind of event — orders. To keep the samples simple, we&amp;#39;ll only calculate these metrics:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;average purchase total&lt;/li&gt;
+&lt;li&gt;top products&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The structure of the event document would be as follows:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;total — float order total&lt;/li&gt;
+&lt;li&gt;line items — array with elements like:
+
+&lt;ul&gt;
+&lt;li&gt;sku — string product sku&lt;/li&gt;
+&lt;li&gt;price — float item price&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For the sake of this example, we will perform different analysis methods against a set of 1,000,000 of such order events, with each having 5 line items on average.&lt;/p&gt;
+
+&lt;p&gt;We&amp;#39;ll use MongoDB as schema-less documents are the fit for storing events and also because of its powerful analytics functionalities. Worth noticing that those features will mainly be described in light of their application to described tasks.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://github.com/goshakkk/simple-analytics-demo&quot;&gt;Sample sources&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3&gt;The naive way&lt;/h3&gt;
+
+&lt;p&gt;The most obvious thing to do is to query all the events and perform our analysis in Ruby.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;average_purchase&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:total&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;top_products&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:line_items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flatten&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:sku&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;last&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sort_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:last&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reverse&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;While it seems pretty simple, it does in no way seem performant.&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;naive&lt;/th&gt;
+&lt;th&gt;time&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;119,775ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;canceled after 2+ hours of waiting&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;canceled after 2+ hours of waiting&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;p&gt;And not only it is being slow, it is also being highly RAM-consuming. The overhead of transmitting 1M documents from Mongo to Ruby process and then storing that in RAM is hurting.&lt;/p&gt;
+
+&lt;h3&gt;Evaluating JS code on MongoDB server&lt;/h3&gt;
+
+&lt;p&gt;What was the worst point of previous case? Right, transmitting the data and storing it in memory.&lt;/p&gt;
+
+&lt;p&gt;If there only was a way to evaluate arbitrary code on MongoDB side… Well, there is. It&amp;#39;s called &lt;a href=&quot;http://docs.mongodb.org/manual/reference/method/db.eval/#db.eval&quot;&gt;db.eval()&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Using it, we can execute any JavaScript as if we were running it inside &lt;code&gt;mongo&lt;/code&gt;. It effectively reduces the overhead of transmitting and introduces overhead of running a JavaScript VM.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;average_purchase&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$eval&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;-&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;EOJS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;    var orders = db.order_events.find(),&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        order_count = orders.count(),&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        total_sum = 0;&lt;/span&gt;
+
+&lt;span class=&quot;sh&quot;&gt;    orders.forEach(function(order) {&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;      total_sum += order.total;&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;    });&lt;/span&gt;
+
+&lt;span class=&quot;sh&quot;&gt;    return total_sum / order_count;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;  EOJS&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;retval&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;top_products&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$eval&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;-&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;EOJS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;    var orders = db.order_events.find(),&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        products = {};&lt;/span&gt;
+
+&lt;span class=&quot;sh&quot;&gt;    orders.forEach(function(order) {&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;      order.line_items.forEach(function(item) {&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        var sku = item.sku;&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        if (!products[sku]) products[sku] = 0;&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        products[sku] += 1;&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;      });&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;    });&lt;/span&gt;
+
+&lt;span class=&quot;sh&quot;&gt;    return products;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;  EOJS&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;retval&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sort_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:last&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reverse&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It is more of the code, but the results are better:&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;db.eval()&lt;/th&gt;
+&lt;th&gt;time&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;8,228ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;42,399ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;50,627ms&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;p&gt;The disadvantage of using it is the write lock being placed while it&amp;#39;s running and overhead of executing it in JavaScript VM.&lt;/p&gt;
+
+&lt;h3&gt;Map/reduce&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/MapReduce&quot;&gt;Map/reduce&lt;/a&gt; is a programming model for processing large data sets. One of highlights is distributing processing of computations across the cluster. Not only that, it also has the benefits of &lt;code&gt;db.eval()&lt;/code&gt;. You can learn more about how MongoDB implements it &lt;a href=&quot;http://docs.mongodb.org/manual/applications/map-reduce/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Worth noticing that map/reduce is not always a suitable substitution for &lt;code&gt;db.eval()&lt;/code&gt;. The tasks we are trying to accomplish, on another hand, are the perfect match for using it.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;average_purchase&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;function() { emit(&amp;#39;avg&amp;#39;, this); }&amp;quot;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%Q{&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    function(key, values) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      var result = { sum: 0, count: 0 };&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      values.forEach(function(value) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;        result.sum += value.total;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;        result.count += 1;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      });&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      return result;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    }&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;  }&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;finalize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%Q{&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    function(key, value) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      value.avg = value.sum / value.count;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      return value;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    }&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;  }&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;map_reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;inline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;finalize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;finalize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;avg&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;top_products&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%Q{&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    function() {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      this.line_items.forEach(function(item) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;        emit(item.sku, item);&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      });&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    }&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;  }&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%Q{&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    function(key, values) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      var result = { purchases: 0 };&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      values.forEach(function(value) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;        result.purchases += 1;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      });&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      return result;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    }&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;  }&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map_reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;inline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_a&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;_id&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;purchases&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sort_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:last&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reverse&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Speed was generally worse compared to &lt;code&gt;db.eval()&lt;/code&gt;. It is because  map/reduce splits tasks in two phases. If map/reduce is run on a shard cluster, tasks would be dispatched to each shard, thus making it faster. (Map/reduce wasn&amp;#39;t meant to be damn fast anyway.)&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;map reduce&lt;/th&gt;
+&lt;th&gt;time&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;20,498ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;112,035ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;132,534ms&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;p&gt;It also suffers from the same thing as &lt;code&gt;db.eval()&lt;/code&gt; does — map/reducing places the write lock while it runs.&lt;/p&gt;
+
+&lt;h3&gt;Aggregation framework&lt;/h3&gt;
+
+&lt;p&gt;While map/reduce is truly awesome, the amount of code to aggregate simple things is often overwhelming.&lt;/p&gt;
+
+&lt;p&gt;Assuming you&amp;#39;re familiar with UNIX shell you would also wonder why can&amp;#39;t you easily chain different operations in map/reduce? What if you wanted to do something like:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;match_criteria | sort | limit | group
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Doing that with map/reduce would be a pain in ass.&lt;/p&gt;
+
+&lt;p&gt;Ok, that sucks, but what are the alternatives? Well, MongoDB 2.1 and higher ships with something called &lt;a href=&quot;http://docs.mongodb.org/manual/applications/aggregation/&quot;&gt;&amp;quot;aggregation framework&amp;quot;&lt;/a&gt;. Essentially, it is chainable map/reduce with common use cases implemented and optimized upfront. It is not a tutorial on it, so refer to the docs when you need. I&amp;#39;d just go by showing how neat it is.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;average_purchase&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aggregate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$group&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;avg&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;avg&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$avg&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$total&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}}&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;avg&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;top_products&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aggregate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$unwind&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$line_items&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$project&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;item&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$line_items&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$group&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$item.sku&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;purchases&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$sum&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$sort&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;purchases&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;_id&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;purchases&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Running it, we can notice great speed improvement compared to any of previously discussed ways:&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;aggregation&lt;/th&gt;
+&lt;th&gt;time&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;2,511ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;29,146ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;31,658ms&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;h3&gt;Possible optimization techniques&lt;/h3&gt;
+
+&lt;p&gt;Whatever method you end up using, it is wise to apply some optimization to metric calculation.&lt;/p&gt;
+
+&lt;p&gt;Computing your metrics on every access to them would be super-dumb. Instead, once calculated, their value should be cached and always returned unless the metric dependencies change.&lt;/p&gt;
+
+&lt;p&gt;In our examples, caches should be invalidated only when a new order is tracked.&lt;/p&gt;
+
+&lt;h3&gt;Comparison&lt;/h3&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;naive&lt;/th&gt;
+&lt;th&gt;db.eval()&lt;/th&gt;
+&lt;th&gt;map/reduce&lt;/th&gt;
+&lt;th&gt;aggregation&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;119,775ms&lt;/td&gt;
+&lt;td&gt;8,228ms&lt;/td&gt;
+&lt;td&gt;20,498ms&lt;/td&gt;
+&lt;td&gt;2,511ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;canceled after 2+ hours of waiting&lt;/em&gt;&lt;/td&gt;
+&lt;td&gt;42,399ms&lt;/td&gt;
+&lt;td&gt;112,035ms&lt;/td&gt;
+&lt;td&gt;29,146ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;total&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;canceled after 2+ hours of waiting&lt;/em&gt;&lt;/td&gt;
+&lt;td&gt;50,627ms&lt;/td&gt;
+&lt;td&gt;132,543ms&lt;/td&gt;
+&lt;td&gt;31,658ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;speed&lt;/td&gt;
+&lt;td&gt;exceptionally low&lt;/td&gt;
+&lt;td&gt;high&lt;/td&gt;
+&lt;td&gt;medium&lt;/td&gt;
+&lt;td&gt;super high&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;memory usage&lt;/td&gt;
+&lt;td&gt;high&lt;/td&gt;
+&lt;td&gt;low&lt;/td&gt;
+&lt;td&gt;low&lt;/td&gt;
+&lt;td&gt;low&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;data transfer overhead&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JS VM overhead&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;write lock&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;easily distributed&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;optimized&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;output limit&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;16Mb&lt;/td&gt;
+&lt;td&gt;16Mb&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;chainable&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;h3&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;Using MongoDB aggregation framework proves to be the fastest option you have. For sure, it is powerful enough to perform simple as well as more advanced analysis of data. It scales well and is simple to write.&lt;/p&gt;
+
+&lt;p&gt;If something more sophisticated needed than it&amp;#39;s possible to do with aggregation framework, you may use map/reduce, trading off the performance and loosing easy chainability. Scalability still remains the point.&lt;/p&gt;
+
+&lt;p&gt;If your task is really simple but is impossible to do with aggregation framework or is very slow under map/reduce, it might be desirable to give &lt;code&gt;db.eval()&lt;/code&gt; a shot. Cons? Doesn&amp;#39;t scale.&lt;/p&gt;
+
+&lt;p&gt;Querying all the documents and performing the analysis right in your programming language is the last resort. It&amp;#39;s a loose by all means and generally it should be used only when neither of other options leads to desired result.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://github.com/goshakkk/simple-analytics-demo&quot;&gt;Sample sources&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;I am not the expert at analytics, just the curious one. If I got something in a wrong way and/or advice the bad thing, feel free to let me know about that.&lt;/em&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Analytics: Analyzing tracked events</title>
+   <link href="/analytics-analyzing-tracked-events"/>
+   <updated>2013-02-07T00:00:00+08:00</updated>
+   <id>/analytics-analyzing-tracked-events</id>
+   <content type="html">&lt;p&gt;In previous article, I&amp;#39;ve shown two essential ways the events get tracked. &lt;/p&gt;
+
+&lt;p&gt;Now, I would like to focus on the latter event of tracking — storing all the event data, and analyzing it ad-hoc afterwards. &lt;/p&gt;
+
+&lt;p&gt;It is important to analyze data in the fastest fashion, while preserving the power. That&amp;#39;s the main concern of this post. &lt;/p&gt;
+
+&lt;p&gt;We&amp;#39;d explore more about that using the shop tracking system as an example. It would track only one kind of event — orders. To keep the samples simple, we&amp;#39;ll only calculate these metrics:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;average purchase total&lt;/li&gt;
+&lt;li&gt;top products&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The structure of the event document would be as follows:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;total — float order total&lt;/li&gt;
+&lt;li&gt;line items — array with elements like:
+
+&lt;ul&gt;
+&lt;li&gt;sku — string product sku&lt;/li&gt;
+&lt;li&gt;price — float item price&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For the sake of this example, we will perform different analysis methods against a set of 1,000,000 of such order events, with each having 5 line items on average.&lt;/p&gt;
+
+&lt;p&gt;We&amp;#39;ll use MongoDB as schema-less documents are the fit for storing events and also because of its powerful analytics functionalities. Worth noticing that those features will mainly be described in light of their application to described tasks.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://github.com/goshakkk/simple-analytics-demo&quot;&gt;Sample sources&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3&gt;The naive way&lt;/h3&gt;
+
+&lt;p&gt;The most obvious thing to do is to query all the events and perform our analysis in Ruby.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;average_purchase&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:total&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;top_products&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:line_items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;flatten&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;group_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:sku&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;last&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sort_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:last&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reverse&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;While it seems pretty simple, it does in no way seem performant.&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;naive&lt;/th&gt;
+&lt;th&gt;time&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;119,775ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;canceled after 2+ hours of waiting&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;canceled after 2+ hours of waiting&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;p&gt;And not only it is being slow, it is also being highly RAM-consuming. The overhead of transmitting 1M documents from Mongo to Ruby process and then storing that in RAM is hurting.&lt;/p&gt;
+
+&lt;h3&gt;Evaluating JS code on MongoDB server&lt;/h3&gt;
+
+&lt;p&gt;What was the worst point of previous case? Right, transmitting the data and storing it in memory.&lt;/p&gt;
+
+&lt;p&gt;If there only was a way to evaluate arbitrary code on MongoDB side… Well, there is. It&amp;#39;s called &lt;a href=&quot;http://docs.mongodb.org/manual/reference/method/db.eval/#db.eval&quot;&gt;db.eval()&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Using it, we can execute any JavaScript as if we were running it inside &lt;code&gt;mongo&lt;/code&gt;. It effectively reduces the overhead of transmitting and introduces overhead of running a JavaScript VM.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;average_purchase&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$eval&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;-&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;EOJS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;    var orders = db.order_events.find(),&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        order_count = orders.count(),&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        total_sum = 0;&lt;/span&gt;
+
+&lt;span class=&quot;sh&quot;&gt;    orders.forEach(function(order) {&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;      total_sum += order.total;&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;    });&lt;/span&gt;
+
+&lt;span class=&quot;sh&quot;&gt;    return total_sum / order_count;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;  EOJS&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;retval&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;top_products&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$eval&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;-&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;EOJS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;    var orders = db.order_events.find(),&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        products = {};&lt;/span&gt;
+
+&lt;span class=&quot;sh&quot;&gt;    orders.forEach(function(order) {&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;      order.line_items.forEach(function(item) {&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        var sku = item.sku;&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        if (!products[sku]) products[sku] = 0;&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;        products[sku] += 1;&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;      });&lt;/span&gt;
+&lt;span class=&quot;sh&quot;&gt;    });&lt;/span&gt;
+
+&lt;span class=&quot;sh&quot;&gt;    return products;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;  EOJS&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;retval&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sort_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:last&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reverse&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It is more of the code, but the results are better:&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;db.eval()&lt;/th&gt;
+&lt;th&gt;time&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;8,228ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;42,399ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;50,627ms&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;p&gt;The disadvantage of using it is the write lock being placed while it&amp;#39;s running and overhead of executing it in JavaScript VM.&lt;/p&gt;
+
+&lt;h3&gt;Map/reduce&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/MapReduce&quot;&gt;Map/reduce&lt;/a&gt; is a programming model for processing large data sets. One of highlights is distributing processing of computations across the cluster. Not only that, it also has the benefits of &lt;code&gt;db.eval()&lt;/code&gt;. You can learn more about how MongoDB implements it &lt;a href=&quot;http://docs.mongodb.org/manual/applications/map-reduce/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Worth noticing that map/reduce is not always a suitable substitution for &lt;code&gt;db.eval()&lt;/code&gt;. The tasks we are trying to accomplish, on another hand, are the perfect match for using it.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;average_purchase&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;function() { emit(&amp;#39;avg&amp;#39;, this); }&amp;quot;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%Q{&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    function(key, values) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      var result = { sum: 0, count: 0 };&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      values.forEach(function(value) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;        result.sum += value.total;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;        result.count += 1;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      });&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      return result;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    }&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;  }&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;finalize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%Q{&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    function(key, value) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      value.avg = value.sum / value.count;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      return value;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    }&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;  }&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;map_reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;inline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;finalize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;finalize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;avg&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;top_products&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%Q{&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    function() {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      this.line_items.forEach(function(item) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;        emit(item.sku, item);&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      });&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    }&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;  }&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sx&quot;&gt;%Q{&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    function(key, values) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      var result = { purchases: 0 };&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      values.forEach(function(value) {&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;        result.purchases += 1;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      });&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;      return result;&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;    }&lt;/span&gt;
+&lt;span class=&quot;sx&quot;&gt;  }&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map_reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reduce&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;inline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_a&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;_id&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;value&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;purchases&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sort_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:last&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reverse&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Speed was generally worse compared to &lt;code&gt;db.eval()&lt;/code&gt;. It is because  map/reduce splits tasks in two phases. If map/reduce is run on a shard cluster, tasks would be dispatched to each shard, thus making it faster. (Map/reduce wasn&amp;#39;t meant to be damn fast anyway.)&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;map reduce&lt;/th&gt;
+&lt;th&gt;time&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;20,498ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;112,035ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;132,534ms&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;p&gt;It also suffers from the same thing as &lt;code&gt;db.eval()&lt;/code&gt; does — map/reducing places the write lock while it runs.&lt;/p&gt;
+
+&lt;h3&gt;Aggregation framework&lt;/h3&gt;
+
+&lt;p&gt;While map/reduce is truly awesome, the amount of code to aggregate simple things is often overwhelming.&lt;/p&gt;
+
+&lt;p&gt;Assuming you&amp;#39;re familiar with UNIX shell you would also wonder why can&amp;#39;t you easily chain different operations in map/reduce? What if you wanted to do something like:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;match_criteria | sort | limit | group
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Doing that with map/reduce would be a pain in ass.&lt;/p&gt;
+
+&lt;p&gt;Ok, that sucks, but what are the alternatives? Well, MongoDB 2.1 and higher ships with something called &lt;a href=&quot;http://docs.mongodb.org/manual/applications/aggregation/&quot;&gt;&amp;quot;aggregation framework&amp;quot;&lt;/a&gt;. Essentially, it is chainable map/reduce with common use cases implemented and optimized upfront. It is not a tutorial on it, so refer to the docs when you need. I&amp;#39;d just go by showing how neat it is.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;average_purchase&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aggregate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$group&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;avg&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;avg&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$avg&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$total&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}}&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;avg&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;top_products&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aggregate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$unwind&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$line_items&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$project&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;item&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$line_items&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$group&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;_id&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;$item.sku&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;purchases&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$sum&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;$sort&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;purchases&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;_id&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;purchases&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Running it, we can notice great speed improvement compared to any of previously discussed ways:&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;aggregation&lt;/th&gt;
+&lt;th&gt;time&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;2,511ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;29,146ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;31,658ms&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;h3&gt;Possible optimization techniques&lt;/h3&gt;
+
+&lt;p&gt;Whatever method you end up using, it is wise to apply some optimization to metric calculation.&lt;/p&gt;
+
+&lt;p&gt;Computing your metrics on every access to them would be super-dumb. Instead, once calculated, their value should be cached and always returned unless the metric dependencies change.&lt;/p&gt;
+
+&lt;p&gt;In our examples, caches should be invalidated only when a new order is tracked.&lt;/p&gt;
+
+&lt;h3&gt;Comparison&lt;/h3&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;naive&lt;/th&gt;
+&lt;th&gt;db.eval()&lt;/th&gt;
+&lt;th&gt;map/reduce&lt;/th&gt;
+&lt;th&gt;aggregation&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;avg purchase&lt;/td&gt;
+&lt;td&gt;119,775ms&lt;/td&gt;
+&lt;td&gt;8,228ms&lt;/td&gt;
+&lt;td&gt;20,498ms&lt;/td&gt;
+&lt;td&gt;2,511ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;top products&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;canceled after 2+ hours of waiting&lt;/em&gt;&lt;/td&gt;
+&lt;td&gt;42,399ms&lt;/td&gt;
+&lt;td&gt;112,035ms&lt;/td&gt;
+&lt;td&gt;29,146ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;total&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;canceled after 2+ hours of waiting&lt;/em&gt;&lt;/td&gt;
+&lt;td&gt;50,627ms&lt;/td&gt;
+&lt;td&gt;132,543ms&lt;/td&gt;
+&lt;td&gt;31,658ms&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;speed&lt;/td&gt;
+&lt;td&gt;exceptionally low&lt;/td&gt;
+&lt;td&gt;high&lt;/td&gt;
+&lt;td&gt;medium&lt;/td&gt;
+&lt;td&gt;super high&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;memory usage&lt;/td&gt;
+&lt;td&gt;high&lt;/td&gt;
+&lt;td&gt;low&lt;/td&gt;
+&lt;td&gt;low&lt;/td&gt;
+&lt;td&gt;low&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;data transfer overhead&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;JS VM overhead&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;write lock&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;easily distributed&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;optimized&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;output limit&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;16Mb&lt;/td&gt;
+&lt;td&gt;16Mb&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;chainable&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;no&lt;/td&gt;
+&lt;td&gt;yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;h3&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;Using MongoDB aggregation framework proves to be the fastest option you have. For sure, it is powerful enough to perform simple as well as more advanced analysis of data. It scales well and is simple to write.&lt;/p&gt;
+
+&lt;p&gt;If something more sophisticated needed than it&amp;#39;s possible to do with aggregation framework, you may use map/reduce, trading off the performance and loosing easy chainability. Scalability still remains the point.&lt;/p&gt;
+
+&lt;p&gt;If your task is really simple but is impossible to do with aggregation framework or is very slow under map/reduce, it might be desirable to give &lt;code&gt;db.eval()&lt;/code&gt; a shot. Cons? Doesn&amp;#39;t scale.&lt;/p&gt;
+
+&lt;p&gt;Querying all the documents and performing the analysis right in your programming language is the last resort. It&amp;#39;s a loose by all means and generally it should be used only when neither of other options leads to desired result.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://github.com/goshakkk/simple-analytics-demo&quot;&gt;Sample sources&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;I am not the expert at analytics, just the curious one. If I got something in a wrong way and/or advice the bad thing, feel free to let me know about that.&lt;/em&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Tracking events in analytics systems</title>
+   <link href="/tracking-events-in-analytics-systems"/>
+   <updated>2013-01-23T00:00:00+08:00</updated>
+   <id>/tracking-events-in-analytics-systems</id>
+   <content type="html">&lt;p&gt;Lately, I have been working on ShopStream, an analytics-as-a-service for online stores. I would like to reflect on the choices I made and the things I learned during building it.&lt;/p&gt;
+
+&lt;p&gt;The terms I use in the article:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;analytics systems — systems that allow to track and vizualize the data (sometimes third-party, sometimes not)&lt;/li&gt;
+&lt;li&gt;metrics — some numbers computed for the tracked data, that give some sense of that set of data. &amp;quot;Average purchase&amp;quot; for a specific time period for a shop is a nice example of that&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;From the standpoint of the users of analytic systems, there is only one thing to be done to enjoy their numbers, charts, and so on — that thing is to track events they are interested in. New page load, item added to the cart, check out.&lt;/p&gt;
+
+&lt;p&gt;As I have explored, there are basically two options of tracking those events at programmatic level.&lt;/p&gt;
+
+&lt;h3&gt;&amp;quot;Why do we need the original payload&amp;quot;&lt;/h3&gt;
+
+&lt;p&gt;It is so simple to update metric values right after the event was sent to be tracked. As simple as &lt;code&gt;db.metrics.update({shop_id: 1, year: 2013, month: 1, day: 10, hour: 10}, {$inc: {pageviews: 1} })&lt;/code&gt;. No need to store actual event after updating the metrics.&lt;/p&gt;
+
+&lt;p&gt;As anything, this approach comes with its upsides and downsides. &lt;/p&gt;
+
+&lt;p&gt;You benefit by:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;having smaller DB and index size. There is no raw event data to be stored and indexed&lt;/li&gt;
+&lt;li&gt;having metric value as a field in your document, so simple&lt;/li&gt;
+&lt;li&gt;having generally better performance&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;But there are a plenty of things where you loose, namely:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;if you add a new kind of metric that you system calculates, it is calculated only for new events&lt;/li&gt;
+&lt;li&gt;there is quite smaller number of ways you can analyze your data. You just have numbers over there, you can&amp;#39;t do anything with already tracked data — because there is no actual data&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;True, it works just nicely in some cases. One example of that are systems which track data that is actual for short periods of times — systems to track average server load, to record your logs and similar.&lt;/p&gt;
+
+&lt;p&gt;But there are cases when you need something more sophisticated — when you want to keep track of everything that ever happened and be able to analyze all of that. There is a solution for that. &lt;/p&gt;
+
+&lt;h3&gt;Always. Save. Raw. Event. Data&lt;/h3&gt;
+
+&lt;p&gt;As the section title implies, it is all about tracking original event payloads and storing all of them.&lt;/p&gt;
+
+&lt;p&gt;You benefit by:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;having access to all the event data&lt;/li&gt;
+&lt;li&gt;being able to do so many things to dissect them&lt;/li&gt;
+&lt;li&gt;having any of your new metric make use of all the data that was ever collected&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Storing all the events is not always a good idea in all cases. It is helpful if you, say, track shop&amp;#39;s purchases (as a 3rd party) — you could analyze the order events to compute top sold products for any period you&amp;#39;d like. You just have a bunch of events, you don&amp;#39;t have to track each of them at different granularity levels (e.g. # of requests in this second/hour/day/month/year), like the first approach does. You could even apply some machine learning on those sets of data to predict profitable seasons and stuff like that.&lt;/p&gt;
+
+&lt;p&gt;Yes, there are downsides:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;you have to store &lt;strong&gt;all&lt;/strong&gt; the data. If you track zillions events an hour, that could result in hilarious size of your database &amp;amp; indexes&lt;/li&gt;
+&lt;li&gt;processing all of the data when you need to compute some number on set of those events could be particularly slow on huge datasets. There are technology &amp;amp; techniques to make it faster, I&amp;#39;ll get more into it in my next blog post&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;There is no single &amp;quot;right&amp;quot; way after all. It&amp;#39;s all about trade-offs — deciding what is important for &lt;em&gt;your&lt;/em&gt; system and what can be left off in favor of something else.&lt;/p&gt;
+
+&lt;p&gt;Speaking of ShopStream — we have decided to take the latter approach. We are constantly changing our views on what metrics we need and are planning on some really neat features that require events being present in their raw view.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;m planning on writing a follow-up post on processing tracked events. Keep posted.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>On being a polyglot</title>
+   <link href="/on-being-a-polyglot"/>
+   <updated>2012-08-21T00:00:00+08:00</updated>
+   <id>/on-being-a-polyglot</id>
+   <content type="html">&lt;p&gt;Back in time, after I learned some Ruby, I liked it a lot. I continued to learn it more and more deeply. Nice syntax. Metaprogramming. Tons of awesome gems. Every aspect of it was awesome. I thought, &amp;quot;OMG, Ruby is the best programming language, I will always use it for everything!&amp;quot; I really loved it.&lt;/p&gt;
+
+&lt;p&gt;Time passed, I was still using Ruby. I heard about plenty of other languages. I didn&amp;#39;t give a fuck, because, well, &amp;quot;Ruby is the best language. Period.&amp;quot; Some time later, however, I have seen the thing from other perspective: being locked into one stack is not only non-fun, it also prevents me from developing as a developer.&lt;/p&gt;
+
+&lt;p&gt;Then I decided to try something. I picked Node.js, read a few articles on it, played around doing different kinds of things with it. In fact, I pretty enjoyed experimenting with a technology that&amp;#39;s new to me. I&amp;#39;ve got to know that there are situations when I would prefer Node over Ruby. And it&amp;#39;s not a bad thing — &amp;quot;If in this given situation Node is better, why would I use Ruby?&amp;quot;&lt;/p&gt;
+
+&lt;p&gt;But there is more. I wanted to experiment more. With lots of other different technologies. And I did it. Scala, Clojure, Erlang, Elixir, Go, etc — they all rock. By playing with them, I got to know about good parts of them. And I don&amp;#39;t pick some &amp;quot;best&amp;quot; of them, I don&amp;#39;t even try. Each of them is awesome, in different situations. (Honestly, I know neither of them on &amp;quot;average&amp;quot; leven, even.)&lt;/p&gt;
+
+&lt;p&gt;I don&amp;#39;t want to be labelled as a &amp;quot;rubyist&amp;quot; (though Ruby development is the thing I do most often). &lt;strong&gt;I am an application developer&lt;/strong&gt;. I mean it, I develop applications and I&amp;#39;m free to employ any technology that seems appropriate for solving some set of problems. Moreover, there are many sets of problems in each application. For some applications, one technology can perform well for all those sets, while for another it would be better to use two different technologies. Or three. Or even more. And you know what, I&amp;#39;m not afraid to use a few technologies for one app. I think this is nice.&lt;/p&gt;
+
+&lt;p&gt;So, start doing it &lt;strong&gt;right now&lt;/strong&gt;. Play around one new technology. Repeat.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>My toolbox</title>
+   <link href="/my-toolbox"/>
+   <updated>2012-08-06T00:00:00+08:00</updated>
+   <id>/my-toolbox</id>
+   <content type="html">&lt;p&gt;I haven&amp;#39;t written here anything in a while. Whatever, I&amp;#39;d like to describe my toolbox and setup.&lt;/p&gt;
+
+&lt;h3&gt;Hardware&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://f.cl.ly/items/1S3s330j0X001e0n2d14/Image%202012.08.06%204:46:01%20PM.png&quot; alt=&quot;Macbook Air &amp;amp; Thunderbolt Display&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;First of all, most of magic happens on my Macbook Air 13&amp;quot;. When I&amp;#39;m not on the go, or laying on the couch, the Macbook is hooked up to Thunderbolt Display.&lt;/p&gt;
+
+&lt;p&gt;Macbook Air is really a beautiful, appealing thing. Not only it&amp;#39;s a piece of hardware, but also the awesome experience. Small, thin, light, fast.&lt;/p&gt;
+
+&lt;h2&gt;OS&lt;/h2&gt;
+
+&lt;p&gt;My OS of choice is, not hard to guess, OS X. Compared to Windows, its main pro is, it&amp;#39;s the real &lt;strong&gt;UNIX&lt;/strong&gt;, meaning I have my lovely terminal there, and all UNIX tools. (I can&amp;#39;t even imagine myself working without that.)&lt;/p&gt;
+
+&lt;p&gt;A few pros of OS X over both Windows and different Linux distros:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;UI/UX&lt;/strong&gt;, the one I really like it for. Stylish, elegant, Made For Humans™&lt;/li&gt;
+&lt;li&gt;could be a part of previous, but I&amp;#39;d rather write it separately: &lt;strong&gt;font rendering&lt;/strong&gt;. If you&amp;#39;ve ever seen how texts are rendered on Macs, I doubt you&amp;#39;ll be able to look at how they are rendered on Windows/Linux machines without your eyes bleeding&lt;/li&gt;
+&lt;li&gt;nice &lt;strong&gt;application ecosystem&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;em&gt;(Shortly: I really do care about simplicily, power, and aethetics at the same time.)&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3&gt;Dev environment&lt;/h3&gt;
+
+&lt;p&gt;My entire development environment can be bootstrapped on any Mac with a single command[^1]:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;bash -c &amp;quot;$(curl -L https://raw.github.com/goshakkk/babushka-deps/master/install.sh)&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;a href=&quot;http://mxcl.github.com/homebrew/&quot;&gt;Brew&lt;/a&gt; for packages stuff.&lt;/p&gt;
+
+&lt;p&gt;I use Terminal.app and zsh as my shell, with &lt;a href=&quot;https://github.com/robbyrussell/oh-my-zsh/&quot;&gt;oh my zsh&lt;/a&gt;. Vim is my editor of choice, with &lt;a href=&quot;https://github.com/carlhuda/janus&quot;&gt;janus&lt;/a&gt;. (Here are my &lt;a href=&quot;https://github.com/goshakkk/dotfiles&quot;&gt;dotfiles&lt;/a&gt;.)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://f.cl.ly/items/3I1N3Q1q0x080x0P463W/Screen%20Shot%202012-08-06%20at%205.48.40%20PM.png&quot; alt=&quot;VIM&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;My favorite coding/terminal color scheme is &lt;a href=&quot;http://ethanschoonover.com/solarized&quot;&gt;Solarized&lt;/a&gt;. Choice of Light/Dark one depends on whenever I&amp;#39;m working on a perosnal or client project.&lt;/p&gt;
+
+&lt;p&gt;Rack/Rails, node.js apps are run through &lt;a href=&quot;http://pow.cx&quot;&gt;Pow&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://f.cl.ly/items/0B3T0F022e0e2T2R1k2x/Screen%20Shot%202012-08-06%20at%205.26.30%20PM.png&quot; alt=&quot;manservant&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;I also run a &lt;a href=&quot;https://github.com/jimeh/manservant&quot;&gt;manservant&lt;/a&gt; instance using Pow on &lt;code&gt;man.dev&lt;/code&gt;. With it, I&amp;#39;m able to look up manpages right from Safari.&lt;/p&gt;
+
+&lt;p&gt;Obviously, my personal &amp;amp; client apps are on Github. Github is especially useful for client app development — each repo has got a wiki for some project-related documents, Issues are awesome for both tracking bugs, offering new features, having discussions, and managing milestones.&lt;/p&gt;
+
+&lt;h3&gt;Technologies&lt;/h3&gt;
+
+&lt;p&gt;For managing ruby versions &amp;amp; environments, I prefer &lt;a href=&quot;https://github.com/sstephenson/rbenv/&quot;&gt;rbenv&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Most of times, I&amp;#39;m using the following stack:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Ruby 1.9.3&lt;/li&gt;
+&lt;li&gt;Rails 3&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.mongodb.org&quot;&gt;MongoDB&lt;/a&gt; for DB, and &lt;a href=&quot;http://mongoid.org/en/mongoid/index.html&quot;&gt;Mongoid&lt;/a&gt; as AR-like ORM&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://redis.io&quot;&gt;Redis&lt;/a&gt; with &lt;a href=&quot;https://github.com/redis/redis-rb&quot;&gt;redis-rb&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/plataformatec/devise&quot;&gt;Devise&lt;/a&gt; for authentification&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/ryanb/cancan/&quot;&gt;CanCan&lt;/a&gt; for ability management&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://haml.info&quot;&gt;HAML&lt;/a&gt;/&lt;a href=&quot;http://slim-lang.com&quot;&gt;Slim&lt;/a&gt; for templating&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://sass-lang.com&quot;&gt;SCSS&lt;/a&gt;/&lt;a href=&quot;http://lesscss.org&quot;&gt;Less&lt;/a&gt; for stylesheets&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://coffeescript.org&quot;&gt;CoffeeScript&lt;/a&gt; for JS&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://twitter.github.com/bootstrap/&quot;&gt;Twitter Bootstrap&lt;/a&gt; with some customization&lt;/li&gt;
+&lt;li&gt;Old-fashioned, mostly static client side with some jQuery for animations/AJAX&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/rspec/rspec/&quot;&gt;RSpec&lt;/a&gt;, &lt;a href=&quot;https://github.com/thoughtbot/factory_girl/&quot;&gt;FactoryGirl&lt;/a&gt; for testing (and &lt;a href=&quot;https://github.com/mattsears/nyan-cat-formatter&quot;&gt;nyan cat rspec formatter&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://puma.io&quot;&gt;Puma&lt;/a&gt;/&lt;a href=&quot;http://code.macournoyer.com/thin/&quot;&gt;Thin&lt;/a&gt; as web server&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Whatsoever, I&amp;#39;m currently taking at &lt;a href=&quot;http://backbonejs.org&quot;&gt;Backbone.js&lt;/a&gt;, &lt;a href=&quot;http://underscorejs.org&quot;&gt;Underscore.js&lt;/a&gt;, &lt;a href=&quot;https://github.com/chaplinjs/chaplin&quot;&gt;Chaplin&lt;/a&gt;, &lt;a href=&quot;http://brunch.io&quot;&gt;Brunch&lt;/a&gt;, &lt;a href=&quot;http://coffeescript.org&quot;&gt;CoffeeScript&lt;/a&gt;, &lt;a href=&quot;http://lesscss.org&quot;&gt;Less&lt;/a&gt;, &lt;a href=&quot;http://handlebarsjs.com&quot;&gt;Handlebars&lt;/a&gt; for client side, which is a &lt;strong&gt;simple, separate aplication&lt;/strong&gt;, depending only on backend app API.&lt;/p&gt;
+
+&lt;p&gt;Nevertheless, I don&amp;#39;t like being locked into one language, I want to be a polyglot. I&amp;#39;m playing with a whole lot of different technologies in my spare time — &lt;a href=&quot;http://nodejs.org&quot;&gt;Node.js&lt;/a&gt;, &lt;a href=&quot;http://www.scala-lang.org&quot;&gt;Scala&lt;/a&gt;, &lt;a href=&quot;http://www.erlang.org&quot;&gt;Erlang&lt;/a&gt;/&lt;a href=&quot;http://elixir-lang.org&quot;&gt;Elixir&lt;/a&gt;, &lt;a href=&quot;http://clojure.org&quot;&gt;Clojure&lt;/a&gt;. (And whenever some of those make specific taks better than Ruby, I&amp;#39;m using it over Ruby. So in my recent client app I&amp;#39;ve got a zoo of a few apps — backend Rails app, utility Node.js application, communicating via REST API/&lt;a href=&quot;http://pusher.com&quot;&gt;Pusher&lt;/a&gt; with frontend Backbone app.)&lt;/p&gt;
+
+&lt;p&gt;When building apps, I follow the &lt;a href=&quot;http://www.12factor.net&quot;&gt;Twelve-Factor App methodology&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3&gt;Deployment&lt;/h3&gt;
+
+&lt;p&gt;I don&amp;#39;t deploy my apps to separate own server, nor I really want to.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://heroku.com&quot;&gt;Heroku&lt;/a&gt; allows rapid, dead-simple deployment. And so, it&amp;#39;s my the only deployment option (for now at least, I do understand that some very specific kinds of apps might require separate server). I like its simplicity (in deploying, scaling, managing env vars), I like lots of its hidden power (&lt;a href=&quot;https://devcenter.heroku.com/articles/buildpacks&quot;&gt;buildpacks&lt;/a&gt;, for example). Deployed apps use &lt;a href=&quot;https://addons.heroku.com/mongolab&quot;&gt;MongoLab&lt;/a&gt; for MongoDB in the cloud, &lt;a href=&quot;https://addons.heroku.com/redistogo&quot;&gt;Redis to go&lt;/a&gt; for Redis.&lt;/p&gt;
+
+&lt;p&gt;I track exceptions with &lt;a href=&quot;https://addons.heroku.com/airbrake&quot;&gt;Airbrake&lt;/a&gt;, store and browse heroku logs with &lt;a href=&quot;https://addons.heroku.com/papertrail&quot;&gt;Papertrail&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3&gt;Stuff&lt;/h3&gt;
+
+&lt;p&gt;Safari for browsing, &lt;a href=&quot;http://tapbots.com/tweetbot_mac/&quot;&gt;Tweetbot&lt;/a&gt; as Twitter client app, still Sparrow for email, iTunes for music, &lt;a href=&quot;http://apple.com/aperture/&quot;&gt;Aperture&lt;/a&gt; for photos, &lt;a href=&quot;https://agilebits.com/onepassword&quot;&gt;1Password&lt;/a&gt; for password management, &lt;a href=&quot;http://reederapp.com/&quot;&gt;Reeder&lt;/a&gt;/&lt;a href=&quot;http://getprismatic.com&quot;&gt;Prismatic&lt;/a&gt; for news, &lt;a href=&quot;http://www.readability.com/&quot;&gt;Readability&lt;/a&gt; for read-it-later thing, &lt;a href=&quot;http://getcloudapp.com&quot;&gt;Cloud&lt;/a&gt; app for screenshot sharing, &lt;a href=&quot;http://giantcomet.com/flint/&quot;&gt;Flint&lt;/a&gt; as &lt;a href=&quot;http://campfirenow.com&quot;&gt;Campfire&lt;/a&gt; client, &lt;a href=&quot;http://www.darkheartfelt.com/grandview&quot;&gt;Grandview&lt;/a&gt; for focused writing, &lt;a href=&quot;http://mizage.com/divvy/&quot;&gt;Divvy&lt;/a&gt; for window management, &lt;a href=&quot;http://www.macbartender.com&quot;&gt;Bartender&lt;/a&gt;, &lt;a href=&quot;http://fuelcollective.com/eon&quot;&gt;Eon&lt;/a&gt; as client for &lt;a href=&quot;http://letsfreckle.com&quot;&gt;Freckle&lt;/a&gt;, &lt;a href=&quot;https://ohlife.com&quot;&gt;OhLife&lt;/a&gt; for some sort of journal.&lt;/p&gt;
+
+&lt;p&gt;I also store my backups and photo library on 2Tb &lt;a href=&quot;http://www.apple.com/timecapsule/&quot;&gt;Time Capsule&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;[^1]: it uses &lt;a href=&quot;http://babushka.me&quot;&gt;babushka&lt;/a&gt; to bootstrap the
+environment. Here are my
+&lt;a href=&quot;https://github.com/goshakkk/babushka-deps&quot;&gt;babushka-deps&lt;/a&gt;.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Freelancing</title>
+   <link href="/freelancing"/>
+   <updated>2012-03-24T00:00:00+08:00</updated>
+   <id>/freelancing</id>
+   <content type="html">&lt;p&gt;I&amp;#39;ve been freelancing for a short time now. Just wanted to try myself at it, maybe create some interesting real-world projects &amp;amp; earn some money. I&amp;#39;d like to share my thoughts on it.&lt;/p&gt;
+
+&lt;h3&gt;Finding clients is not hard&lt;/h3&gt;
+
+&lt;p&gt;I just occasionally browse freelancing sites for several minutes. Sometimes I see nothing interesting. But when I see one, I just apply to it.&lt;/p&gt;
+
+&lt;h3&gt;Portfolio ain&amp;#39;t a requirement&lt;/h3&gt;
+
+&lt;p&gt;I have heard many times from people that due to lack of portfolio they won&amp;#39;t hired. That might be truth for some projects, however, even good-paying projects I&amp;#39;ve applied to rare ask for a portfolio.&lt;/p&gt;
+
+&lt;h3&gt;Clients like to communicate&lt;/h3&gt;
+
+&lt;p&gt;They like when I update them on every single small change. It creates some effect of nice contractor in their eyes if I communicate often with them, am polite, etc.&lt;/p&gt;
+
+&lt;h3&gt;Clients are nice&lt;/h3&gt;
+
+&lt;p&gt;At least the ones I&amp;#39;ve worked with. Neither of them did tend to ask stupid questions, do silly things, behave impolite.&lt;/p&gt;
+
+&lt;h2&gt;Thoughts&lt;/h2&gt;
+
+&lt;p&gt;I tend to think that while freelancing I have quite more spare time. Yeah, really.&lt;/p&gt;
+
+&lt;p&gt;Freelancing also gives me some feel of freedom: I work for whoever I want, I work whenever I want, I work as much as I want. And get paid for doing things I love doing.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Objective-C: Rubyist's insight</title>
+   <link href="/objective-c-rubyists-insight"/>
+   <updated>2011-08-19T00:00:00+08:00</updated>
+   <id>/objective-c-rubyists-insight</id>
+   <content type="html">&lt;h2&gt;Intro&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://habrastorage.org/storage1/9e3f6a48/f3ee30bb/18d4ea06/4208aa40.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Before I started learning Objective-C, I did some PHP, then Python and
+Ruby. I like Ruby most of all. I like it for its simplicity, pithiness,
+and at the same time, for its power. About a week later (this post was
+originally written in Russian on 26th Jul --
+&lt;a href=&quot;http://habrahabr.ru/blogs/macosxdev/124974/&quot;&gt;link&lt;/a&gt;) I got hackintosh on
+my PC up and running (now I own a MacBook Early 2008 Black). It was OS X
+Lion GM. I knew that the applications for Macs and iPhones are written
+in Objective-C, I even tried to learn Objective-C, but without a Mac
+that kind of learning was unpleasant. I installed Xcode 4.2, I have
+written several simple console apps. And each time I followed some
+tutorial, or just tried to do stuff myself, I kept noticing similarities
+between Ruby and Objective-C (and it&amp;#39;s very logical -- both languages
+are influenced by &lt;a href=&quot;http://en.wikipedia.org/wiki/Smalltalk&quot;&gt;Smalltalk&lt;/a&gt;),
+although they serve different purpose.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://habrastorage.org/storage1/b9449c86/329c5f48/15953b7c/328d6257.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;So I&amp;#39;ll describe a few things that will help Rubyists to understand
+Objective-C. These things are mostly theoretical, without the snippets
+of code. I apologize if some thing are not explained The C Way, I came
+from The World of Ruby. And sorry for my not good enough English.&lt;/p&gt;
+
+&lt;h2&gt;1. Dynamicity&lt;/h2&gt;
+
+&lt;p&gt;We all know that Ruby is a dynamic programming language. Okay but what&amp;#39;s
+with Objective-C? Isn&amp;#39;t it just a superset of C? Not quite. Objective-C
+makes many decisions (e.g. sending a message, etc) at runtime and not at compile time.&lt;/p&gt;
+
+&lt;h2&gt;2. Object model&lt;/h2&gt;
+
+&lt;p&gt;Everything is an object in Ruby. This isn&amp;#39;t always true for Objective-C.
+As Objective-C is superset of C, basic data types (like &lt;code&gt;char&lt;/code&gt;, &lt;code&gt;float&lt;/code&gt;,
+&lt;code&gt;double&lt;/code&gt;, &lt;code&gt;int&lt;/code&gt;, &lt;code&gt;struct&lt;/code&gt;) aren&amp;#39;t objects. However Foundation.framework
+provides the functional wrappers around them as well as such ordinary
+things for Rubyists like Strings, Mutable Arrays, Hashes, etc.&lt;/p&gt;
+
+&lt;h2&gt;3. Sending messages&lt;/h2&gt;
+
+&lt;p&gt;In Ruby, when we call an object method we actually send a message to the
+object:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# what you do&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;method&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# what ruby actually does&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;send&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That is, the method call is converted to passing a message. The same
+thing happens with Objective-C:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;objective-c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;# what you do&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;object&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;# what actually happens&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;objc_msgSend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;@selector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is precisely passing of a message and not a method call, because if
+we call a non-existent method we don&amp;#39;t get any errors at compile time,
+only at runtime (that proves that Objective-C is dynamic too). At
+compile time &lt;code&gt;[object method]&lt;/code&gt; is converted to C-call of
+&lt;code&gt;objc_sendMsg(id object, SEL selector)&lt;/code&gt; function.&lt;/p&gt;
+
+&lt;p&gt;If you use &lt;a href=&quot;http://clang.llvm.org/&quot;&gt;clang3&lt;/a&gt;, it can make it throw errors
+when compiling.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;BTW, in the terminology of C++, methods in both Ruby and Objective-C are virtual.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2&gt;4. Non-strict typing&lt;/h2&gt;
+
+&lt;p&gt;Each developer in Ruby knows that they don&amp;#39;t have to care about types.
+But not everyone knows that with Objective-C they can forget about types
+as well. If the type of the object is unknown to us yet, we can just
+specify the type of object as &lt;code&gt;id&lt;/code&gt;, that means that variable can hold
+value of any type. &lt;code&gt;id&lt;/code&gt; is kinda like a pointer to any object.&lt;/p&gt;
+
+&lt;p&gt;Okay it&amp;#39;s all good. But what with C-types? No, it doesn&amp;#39;t work with
+C-typesi. However we can use Foundation&amp;#39;s wrappers over C types like
+&lt;code&gt;NSNumber&lt;/code&gt;, &lt;code&gt;NSString&lt;/code&gt;, &lt;code&gt;NSArray&lt;/code&gt;, and so forth.&lt;/p&gt;
+
+&lt;h2&gt;5. Class declaration, instances of objects, and properties&lt;/h2&gt;
+
+&lt;p&gt;In Ruby we just define a class, in Objective-C we have to write both
+interface and implementation for the class. In Ruby we can define any i-var from any method, in Objective-C we have to declare all i-vars we are going to use in an interface file.
+An objects are created easily in both langs though. In Ruby we just send
+&lt;code&gt;new&lt;/code&gt; message to the class:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;MyClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In Objective-C we need to allocate memory for the object (&lt;code&gt;alloc&lt;/code&gt;) and
+then to initialize it (with &lt;code&gt;init&lt;/code&gt; or &lt;code&gt;initWith...&lt;/code&gt; method):&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;objective-c&quot;&gt;&lt;span class=&quot;n&quot;&gt;MyClass&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MyClass&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If we want to access the i-vars from the outside, we define getter and
+setter methods. In Ruby we just write &lt;code&gt;attr_accessor :var&lt;/code&gt; inside class
+definition, in Objective-C we write &lt;code&gt;type * variableName&lt;/code&gt; inside i-vars
+definition block, &lt;code&gt;@property(retain) type * variableName&lt;/code&gt; after methods
+definition, and &lt;code&gt;@synthesize variableName&lt;/code&gt; inside class implementation
+file.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;As Objective-C is a superset of C, we ought to care about memory. LLVM compiler however provides us with one interesting feature -- Automatic Reference Counting, which takes care about freeing memory. Xcode 4.2 and newer uses LLVM compiler by default, so we can not care about memory. But for deeper Objective-C understanding I highly recommend you to spend some time understanding memory management.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2&gt;6. Protocols and mixins&lt;/h2&gt;
+
+&lt;p&gt;In Ruby we can define modules and then mix &amp;#39;em into the classes, in a
+such way something like multiple inheritance is realized. In Objective-C
+we haven&amp;#39;t modules. But we have protocols.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;An informal protocol is a list of methods that a class can opt to implement. It is specified in the documentation, since it has no presence in the language. Informal protocols often include optional methods, which, if implemented, can change the behavior of a class. For example, a text field class might have a delegate that implements an informal protocol with an optional method for performing auto-completion of user-typed text. The text field discovers whether the delegate implements that method (via reflection) and, if so, calls the delegate&amp;#39;s method to support the auto-complete feature.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;And for example we can implement a method that can take any object that realizes &lt;code&gt;Serializable&lt;/code&gt; protocol and be sure that the object can respond to &lt;code&gt;serialize&lt;/code&gt; message.&lt;/p&gt;
+
+&lt;h2&gt;7. Categories and class extension&lt;/h2&gt;
+
+&lt;p&gt;If we want to extend a Ruby class, we can simply write:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;hello_world&lt;/span&gt;
+    &lt;span class=&quot;s2&quot;&gt;&amp;quot;Hey&amp;quot;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That way we added &lt;code&gt;hello_world&lt;/code&gt; method to &lt;code&gt;String&lt;/code&gt; class (but we can do
+so in many ways). In Objective-C we can do something similar using
+categories:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;objective-c&quot;&gt;&lt;span class=&quot;k&quot;&gt;@interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NSString&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;(HelloWorld)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSString&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;helloWorld&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;@end&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;@implementation&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;NSString&lt;/span&gt; &lt;span class=&quot;nl&quot;&gt;(HelloWorld)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NSString&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;helloWorld&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;@&amp;quot;Hey&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;@end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Usually categories are saved in files named like &lt;code&gt;ClassToBeExtended+CategoryName&lt;/code&gt; -- e.g. &lt;code&gt;NSString+HelloWorld.h&lt;/code&gt; and &lt;code&gt;NSString+HelloWorld.m&lt;/code&gt;, and then are imported.&lt;/p&gt;
+
+&lt;p&gt;Here are several things that simplified my understanding of
+Objective-C. Hope this article is helpful for you. Good luck!&lt;/p&gt;
+</content>
+ </entry>
+ 
+</feed>

@@ -1,0 +1,15 @@
+
+/atom.xml
+/hire-me.html
+/index.html
+/projects/shopstream.html
+/projects.html
+/sitemap.txt
+
+/hello
+/analytics-analyzing-tracked-events
+/tracking-events-in-analytics-systems
+/on-being-a-polyglot
+/my-toolbox
+/freelancing
+/objective-c-rubyists-insight
